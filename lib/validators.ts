@@ -30,3 +30,7 @@ export const addressSchema = z.object({
 export const passwordResetSchema = z.object({
   email: z.string().email()
 });
+
+export const orderStatusSchema = z.object({
+  status: z.enum(['PENDING', 'PAID', 'SHIPPED', 'DELIVERED', 'CANCELLED'])
+});

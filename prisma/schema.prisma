@@ -46,7 +46,6 @@ model Address {
   state     String
   postal    String
   country   String
-  orders    Order[]
   createdAt DateTime @default(now())
 }
 
@@ -60,7 +59,6 @@ model Product {
   heroImage   String
   modelUrl    String?
   images      ProductImage[]
-  orderItems  OrderItem[]
   createdAt   DateTime        @default(now())
   updatedAt   DateTime        @updatedAt
 }
@@ -73,17 +71,17 @@ model ProductImage {
 }
 
 model Order {
-  id         String   @id @default(cuid())
-  user       User     @relation(fields: [userId], references: [id])
+  id         String       @id @default(cuid())
+  user       User         @relation(fields: [userId], references: [id])
   userId     String
-  status     String   @default("PENDING")
+  status     OrderStatus  @default(PENDING)
   total      Int
-  address    Address  @relation(fields: [addressId], references: [id])
+  address    Address      @relation(fields: [addressId], references: [id])
   addressId  String
   items      OrderItem[]
   stripeId   String?
-  createdAt  DateTime @default(now())
-  updatedAt  DateTime @updatedAt
+  createdAt  DateTime     @default(now())
+  updatedAt  DateTime     @updatedAt
 }
 
 model OrderItem {
