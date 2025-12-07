@@ -1,8 +1,9 @@
 import Link from 'next/link';
 import { ThemeToggle } from './ThemeToggle';
-import { ShoppingBag, User2, ShieldCheck } from 'lucide-react';
+import { ShoppingBag, ShieldCheck } from 'lucide-react';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth';
+import { ProfileMenu } from './ProfileMenu';
 
 export async function Navbar() {
   const session = await getServerSession(authOptions);
@@ -28,9 +29,7 @@ export async function Navbar() {
             <ShoppingBag className="h-5 w-5" />
           </Link>
           {session ? (
-            <Link href="/profile" className="rounded-full border border-slate-200 dark:border-slate-800 p-2 hover:bg-slate-100 dark:hover:bg-slate-900">
-              <User2 className="h-5 w-5" />
-            </Link>
+            <ProfileMenu name={session.user?.name} />
           ) : (
             <Link href="/signin" className="text-sm font-medium hover:text-brand">Sign in</Link>
           )}

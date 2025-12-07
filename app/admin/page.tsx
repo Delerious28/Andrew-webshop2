@@ -4,6 +4,7 @@ import { authOptions } from '@/lib/auth';
 import { prisma } from '@/lib/prisma';
 import { ProductManager } from '@/components/ProductManager';
 import { AdminOrders } from '@/components/AdminOrders';
+import { AdminUsers } from '@/components/AdminUsers';
 
 export default async function AdminPage() {
   const session = await getServerSession(authOptions);
@@ -64,27 +65,9 @@ export default async function AdminPage() {
       <section className="glass-card p-6 space-y-4">
         <div className="flex items-center justify-between">
           <h2 className="text-xl font-semibold">Customers</h2>
-          <p className="text-sm text-slate-500">Addresses and order counts for every account.</p>
+          <p className="text-sm text-slate-500">Search and review user shipping details.</p>
         </div>
-        <div className="grid md:grid-cols-2 gap-4">
-          {users.map((user) => (
-            <div key={user.id} className="rounded-2xl border border-slate-200 dark:border-slate-800 p-4 space-y-2">
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="font-semibold">{user.name}</p>
-                  <p className="text-sm text-slate-500">{user.email}</p>
-                </div>
-                <span className="text-xs px-2 py-1 rounded-full border border-slate-200 dark:border-slate-800">{user.role}</span>
-              </div>
-              <p className="text-sm text-slate-600 dark:text-slate-300">Orders: {user.orders.length}</p>
-              {user.addresses[0] ? (
-                <p className="text-xs text-slate-500">{user.addresses[0].line1}, {user.addresses[0].city}</p>
-              ) : (
-                <p className="text-xs text-slate-500">No address on file.</p>
-              )}
-            </div>
-          ))}
-        </div>
+        <AdminUsers users={users} />
       </section>
     </div>
   );
