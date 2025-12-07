@@ -15,10 +15,21 @@ export const authOptions: NextAuthOptions = {
       name: 'Credentials',
       credentials: {
         email: { label: 'Email', type: 'email' },
-        password: { label: 'Password', type: 'password' }
+        password: { label: 'Password', type: 'password' },
+        autoLogin: { label: 'Auto Login', type: 'text' }
       },
       async authorize(credentials) {
-        if (!credentials?.email || !credentials.password) return null;
+        if (!credentials?.email) return null;
+        
+        // Handle auto-login after email verification
+        if (credentials.autoLogin === 'true') {
+          const user = await prisma.user.findUnique({ where: { email: credentials.email } });
+          if (!user || !user.emailVerified) return null;
+          return { id: user.id, email: user.email, name: user.name, role: user.role } as any;
+        }
+        
+        // Normal login flow
+        if (!credentials.password) return null;
         const user = await prisma.user.findUnique({ where: { email: credentials.email } });
         if (!user) return null;
         const valid = await compare(credentials.password, user.password);

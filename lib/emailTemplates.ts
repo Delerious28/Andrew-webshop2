@@ -9,38 +9,118 @@ export const emailTemplates = {
       <!DOCTYPE html>
       <html>
         <head>
+          <meta charset="utf-8">
+          <meta name="viewport" content="width=device-width, initial-scale=1.0">
           <style>
-            body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; color: #1f2937; }
-            .container { max-width: 600px; margin: 0 auto; padding: 20px; }
-            .header { text-align: center; margin-bottom: 30px; }
-            .logo { font-size: 28px; font-weight: bold; color: #2563eb; }
-            .content { background: #f9fafb; padding: 20px; border-radius: 8px; margin: 20px 0; }
-            .button { display: inline-block; background: #2563eb; color: white; padding: 12px 24px; border-radius: 6px; text-decoration: none; margin: 20px 0; }
-            .footer { text-align: center; font-size: 12px; color: #6b7280; margin-top: 30px; }
+            body { 
+              font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif; 
+              color: #1f2937; 
+              background: #f3f4f6;
+              margin: 0;
+              padding: 0;
+            }
+            .email-wrapper { 
+              background: #f3f4f6; 
+              padding: 40px 20px; 
+            }
+            .container { 
+              max-width: 600px; 
+              margin: 0 auto; 
+              background: white;
+              border-radius: 16px;
+              box-shadow: 0 4px 6px rgba(0, 0, 0, 0.07);
+              overflow: hidden;
+            }
+            .header { 
+              background: linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%);
+              text-align: center; 
+              padding: 40px 20px;
+            }
+            .logo { 
+              font-size: 36px; 
+              font-weight: bold; 
+              color: white;
+              margin-bottom: 8px;
+            }
+            .tagline {
+              color: rgba(255, 255, 255, 0.9);
+              font-size: 14px;
+              margin: 0;
+            }
+            .content { 
+              padding: 40px 30px; 
+            }
+            .content h2 {
+              color: #111827;
+              font-size: 24px;
+              margin-top: 0;
+              margin-bottom: 16px;
+            }
+            .content p {
+              color: #4b5563;
+              font-size: 16px;
+              line-height: 1.6;
+              margin: 0 0 20px 0;
+            }
+            .button-container {
+              text-align: center;
+              margin: 35px 0;
+            }
+            .button { 
+              display: inline-block; 
+              background: linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%);
+              color: white !important; 
+              padding: 16px 48px; 
+              border-radius: 8px; 
+              text-decoration: none;
+              font-weight: 600;
+              font-size: 16px;
+              box-shadow: 0 4px 12px rgba(37, 99, 235, 0.3);
+              transition: all 0.3s ease;
+            }
+            .button:hover {
+              transform: translateY(-2px);
+              box-shadow: 0 6px 16px rgba(37, 99, 235, 0.4);
+            }
+            .footer { 
+              background: #f9fafb;
+              text-align: center; 
+              font-size: 13px; 
+              color: #6b7280; 
+              padding: 30px 20px;
+              border-top: 1px solid #e5e7eb;
+            }
+            .footer p {
+              margin: 8px 0;
+            }
           </style>
         </head>
         <body>
-          <div class="container">
-            <div class="header">
-              <div class="logo">🚴 Remoof</div>
-              <p style="color: #6b7280; margin-top: 5px;">Bespoke Bicycle Parts</p>
-            </div>
-            
-            <h2>Welcome, ${name}!</h2>
-            
-            <div class="content">
-              <p>Thanks for signing up for Remoof! To complete your account setup and start ordering premium bicycle parts, please verify your email address.</p>
+          <div class="email-wrapper">
+            <div class="container">
+              <div class="header">
+                <div class="logo">🚴 Remoof</div>
+                <p class="tagline">Bespoke Bicycle Parts</p>
+              </div>
               
-              <center>
-                <a href="${verifyLink}" class="button">Verify Email Address</a>
-              </center>
+              <div class="content">
+                <h2>Welcome aboard, ${name}! 🎉</h2>
+                
+                <p>Thank you for signing up for Remoof! We're excited to have you join our community of cycling enthusiasts.</p>
+                
+                <p>To complete your account setup and start exploring our collection of premium bicycle parts, please verify your email address by clicking the button below:</p>
+                
+                <div class="button-container">
+                  <a href="${verifyLink}" class="button">✓ Verify Email Address</a>
+                </div>
+                
+                <p style="color: #9ca3af; font-size: 14px;">This verification link will expire in 24 hours for security purposes.</p>
+              </div>
               
-              <p style="color: #6b7280; font-size: 14px;">Or copy this link: <br/><code style="background: #e5e7eb; padding: 4px 8px; border-radius: 4px;">${verifyLink}</code></p>
-            </div>
-            
-            <div class="footer">
-              <p>This link expires in 24 hours. If you didn't create this account, please ignore this email.</p>
-              <p>&copy; 2025 Remoof. All rights reserved.</p>
+              <div class="footer">
+                <p>If you didn't create this account, please ignore this email.</p>
+                <p>&copy; 2025 Remoof. All rights reserved.</p>
+              </div>
             </div>
           </div>
         </body>
