@@ -15,6 +15,10 @@ export async function POST(req: Request) {
   const body = await req.json();
   const parsed = productSchema.safeParse(body);
   if (!parsed.success) return NextResponse.json({ message: parsed.error.message }, { status: 400 });
+  
+  // Use new media array if provided, otherwise fall back to images array
+  const mediaToCreate = parsed.data.media || (parsed.data.images?.map((url) => ({ url, type: 'image' })) ?? []);
+  
   const created = await prisma.product.create({
     data: {
       title: parsed.data.title,
@@ -24,8 +28,15 @@ export async function POST(req: Request) {
       stock: parsed.data.stock,
       heroImage: parsed.data.heroImage,
       modelUrl: parsed.data.modelUrl,
-      images: parsed.data.images ? { create: parsed.data.images.map((url) => ({ url })) } : undefined
-    }
+      images: mediaToCreate.length > 0 ? {
+        create: mediaToCreate.map((media) => ({
+          url: media.url,
+          type: media.type,
+          order: media.order ?? 0
+        }))
+      } : undefined
+    },
+    include: { images: true }
   });
   return NextResponse.json(created, { status: 201 });
 }

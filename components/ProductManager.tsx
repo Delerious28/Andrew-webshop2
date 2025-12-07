@@ -2,7 +2,8 @@
 import { useMemo, useState } from 'react';
 import { Product, ProductImage } from '@prisma/client';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Search, UploadCloud } from 'lucide-react';
+import { Search } from 'lucide-react';
+import { MediaGallery } from './MediaGallery';
 
 interface ProductManagerProps {
   products: (Product & { images: ProductImage[] })[];
@@ -16,7 +17,6 @@ type EditableProduct = {
   stock: number | string;
   heroImage: string;
   modelUrl: string;
-  images: string;
 };
 
 const defaultPayload: EditableProduct = {
@@ -26,16 +26,22 @@ const defaultPayload: EditableProduct = {
   category: '',
   stock: 0,
   heroImage: '',
-  modelUrl: '',
-  images: ''
+  modelUrl: ''
+};
+
+type MediaItem = {
+  id: string;
+  url: string;
+  type: 'image' | 'video';
+  order: number;
 };
 
 export function ProductManager({ products }: ProductManagerProps) {
   const [list, setList] = useState(products);
   const [newProduct, setNewProduct] = useState(defaultPayload);
+  const [newProductMedia, setNewProductMedia] = useState<MediaItem[]>([]);
   const [message, setMessage] = useState<string | null>(null);
-  const [newUploads, setNewUploads] = useState<string[]>([]);
-  const [mediaUploads, setMediaUploads] = useState<Record<string, string[]>>({});
+  const [editingMedia, setEditingMedia] = useState<Record<string, MediaItem[]>>({});
   const [query, setQuery] = useState('');
   const [activeId, setActiveId] = useState<string | null>(products[0]?.id ?? null);
   const [editing, setEditing] = useState<Record<string, EditableProduct>>(() => {
@@ -48,29 +54,41 @@ export function ProductManager({ products }: ProductManagerProps) {
         category: p.category,
         stock: p.stock,
         heroImage: p.heroImage,
-        modelUrl: p.modelUrl || '',
-        images: p.images?.map((img) => img.url).join(',') || ''
+        modelUrl: p.modelUrl || ''
       };
+      setEditingMedia(prev => ({
+        ...prev,
+        [p.id]: p.images.sort((a, b) => a.order - b.order).map(img => ({
+          id: img.id,
+          url: img.url,
+          type: img.type as 'image' | 'video',
+          order: img.order
+        }))
+      }));
     });
     return map;
   });
 
-  const statusList = useMemo(() => ['title', 'description', 'price', 'category', 'stock', 'heroImage', 'modelUrl', 'images'], []);
+  const statusList = useMemo(() => ['title', 'description', 'price', 'category', 'stock', 'heroImage', 'modelUrl'], []);
 
-  const parseImageArray = (value: string) => value.split(',').map((v) => v.trim()).filter(Boolean);
-
-  const bufferFiles = async (files: FileList | null) => {
-    if (!files || files.length === 0) return [] as string[];
-    const readers = Array.from(files).map(
+  const bufferFiles = async (files: File[]) => {
+    const readers = files.map(
       (file) =>
-        new Promise<string>((resolve, reject) => {
+        new Promise<{ data: string; type: 'image' | 'video' }>((resolve, reject) => {
           const reader = new FileReader();
-          reader.onload = () => resolve(reader.result as string);
+          const type = file.type.startsWith('video') ? 'video' : 'image';
+          reader.onload = () => resolve({ data: reader.result as string, type });
           reader.onerror = () => reject(reader.error);
           reader.readAsDataURL(file);
         })
     );
-    return Promise.all(readers);
+    const results = await Promise.all(readers);
+    return results.map((r, i) => ({
+      id: `temp-${Date.now()}-${i}`,
+      url: r.data,
+      type: r.type,
+      order: 0
+    }));
   };
 
   const handleCreate = async (e: React.FormEvent) => {
@@ -84,14 +102,14 @@ export function ProductManager({ products }: ProductManagerProps) {
         price: Number(newProduct.price),
         stock: Number(newProduct.stock),
         modelUrl: newProduct.modelUrl || undefined,
-        images: [...parseImageArray(newProduct.images), ...newUploads]
+        media: newProductMedia
       })
     });
     if (res.ok) {
       const created = await res.json();
       setList((prev) => [...prev, { ...created, images: [] }]);
       setNewProduct(defaultPayload);
-      setNewUploads([]);
+      setNewProductMedia([]);
       setMessage('Product created.');
     } else {
       const data = await res.json();
@@ -102,6 +120,7 @@ export function ProductManager({ products }: ProductManagerProps) {
   const handleUpdate = async (id: string) => {
     setMessage(null);
     const payload = editing[id];
+    const media = editingMedia[id] || [];
     const res = await fetch(`/api/products/${id}`, {
       method: 'PUT',
       headers: { 'Content-Type': 'application/json' },
@@ -110,13 +129,12 @@ export function ProductManager({ products }: ProductManagerProps) {
         price: Number(payload.price),
         stock: Number(payload.stock),
         modelUrl: payload.modelUrl || undefined,
-        images: [...parseImageArray(payload.images), ...(mediaUploads[id] || [])]
+        media: media
       })
     });
     if (res.ok) {
       const updated = await res.json();
       setList((prev) => prev.map((p) => (p.id === id ? { ...updated, images: p.images } : p)));
-      setMediaUploads((prev) => ({ ...prev, [id]: [] }));
       setMessage('Product updated.');
     } else {
       const data = await res.json();
@@ -151,58 +169,66 @@ export function ProductManager({ products }: ProductManagerProps) {
 
   const activeProduct = filtered.find((p) => p.id === activeId) ?? filtered[0] ?? list[0];
 
+  // Fields to show in text input form (excluding media/image fields)
+  const inputFields = ['title', 'description', 'price', 'category', 'stock', 'heroImage', 'modelUrl'] as const;
+
   return (
     <div className="space-y-6">
-      <div className="space-y-3">
-        <h3 className="text-lg font-semibold">Create product</h3>
-        <form onSubmit={handleCreate} className="grid gap-3 md:grid-cols-2">
-          {statusList.map((key) => (
-            <label key={key} className="space-y-1 text-sm">
-              <span className="capitalize font-medium">{key.replace('Url', ' URL')}</span>
-              <input
-                className="w-full rounded-lg border border-slate-200 dark:border-slate-800 bg-transparent px-3 py-2"
-                value={(newProduct as any)[key]}
-                onChange={(e) => setNewProduct((prev) => ({ ...prev, [key]: e.target.value }))}
-                required={['title', 'description', 'price', 'category', 'stock', 'heroImage'].includes(key)}
-              />
-              {key === 'images' && <span className="text-xs text-slate-500">Comma separate gallery image or video URLs.</span>}
-            </label>
-          ))}
-          <label className="flex flex-col gap-2 text-sm border border-dashed border-slate-300 dark:border-slate-700 rounded-xl p-3">
-            <span className="font-medium flex items-center gap-2"><UploadCloud className="h-4 w-4" /> Upload media</span>
-            <input
-              type="file"
-              accept="image/*,video/*"
-              multiple
-              onChange={async (e) => {
-                const buffered = await bufferFiles(e.target.files);
-                setNewUploads(buffered);
-              }}
+      {/* CREATE PRODUCT SECTION */}
+      <div className="space-y-3 rounded-2xl border border-slate-200 dark:border-slate-800 p-6 bg-white/50 dark:bg-slate-900/50">
+        <h3 className="text-lg font-semibold">➕ Create product</h3>
+        <p className="text-sm text-slate-500 dark:text-slate-300">Add a new component to your catalogue</p>
+        <form onSubmit={handleCreate} className="space-y-4">
+          {/* Text input fields */}
+          <div className="grid gap-4 md:grid-cols-2">
+            {inputFields.map((key) => (
+              <label key={key} className="space-y-2 text-sm">
+                <span className="capitalize font-medium block text-slate-700 dark:text-slate-200">{key.replace('Url', ' URL')}</span>
+                <input
+                  className="w-full rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 px-3 py-2.5 text-slate-900 dark:text-white placeholder:text-slate-400 focus:ring-2 focus:ring-brand/60 focus:border-transparent transition"
+                  placeholder={key === 'price' ? '10000' : key === 'stock' ? '25' : key === 'category' ? 'e.g. Wheels' : ''}
+                  value={(newProduct as any)[key]}
+                  onChange={(e) => setNewProduct((prev) => ({ ...prev, [key]: e.target.value }))}
+                  required={['title', 'description', 'price', 'category', 'stock'].includes(key)}
+                />
+                {key === 'price' && <span className="text-xs text-slate-500 dark:text-slate-400">Price in cents (e.g. 10000 = $100.00)</span>}
+              </label>
+            ))}
+          </div>
+
+          {/* Media Gallery */}
+          <div className="space-y-2">
+            <label className="text-sm font-medium block text-slate-700 dark:text-slate-200">Product Media (Images & Videos)</label>
+            <MediaGallery
+              media={newProductMedia}
+              onMediaChange={setNewProductMedia}
+              onUpload={bufferFiles}
             />
-            <span className="text-xs text-slate-500">Images and short videos are encoded for quick previews.</span>
-          </label>
+          </div>
+
           <button
             type="submit"
-            className="md:col-span-2 justify-self-start px-4 py-2 rounded-full bg-brand text-white font-semibold shadow hover:-translate-y-0.5 transition"
+            className="px-5 py-2.5 rounded-full bg-brand text-white font-semibold shadow-lg hover:shadow-xl hover:-translate-y-0.5 transition"
           >
-            Publish product
+            ✨ Publish product
           </button>
         </form>
       </div>
 
+      {/* EXISTING INVENTORY SECTION */}
       <div className="space-y-3">
         <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-3">
           <div>
-            <h3 className="text-lg font-semibold">Existing inventory</h3>
-            <p className="text-sm text-slate-500">Search, select, and edit with rich media uploads.</p>
+            <h3 className="text-lg font-semibold">🔍 Existing inventory</h3>
+            <p className="text-sm text-slate-500 dark:text-slate-300">Search, select, and edit products</p>
           </div>
           <div className="relative w-full md:w-80">
-            <Search className="h-4 w-4 absolute left-3 top-2.5 text-slate-400" />
+            <Search className="h-4 w-4 absolute left-3 top-3 text-slate-400" />
             <input
               value={query}
               onChange={(e) => setQuery(e.target.value)}
-              placeholder="Search products"
-              className="w-full rounded-xl border border-slate-200 dark:border-slate-800 bg-transparent pl-9 pr-3 py-2 focus:ring-2 focus:ring-brand/60 transition"
+              placeholder="Search products..."
+              className="w-full rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 pl-9 pr-3 py-2.5 text-slate-900 dark:text-white placeholder:text-slate-400 focus:ring-2 focus:ring-brand/60 focus:border-transparent transition"
             />
           </div>
         </div>
@@ -221,23 +247,24 @@ export function ProductManager({ products }: ProductManagerProps) {
                   exit={{ opacity: 0, y: -16 }}
                   className={`w-full text-left rounded-2xl border p-4 transition shadow-sm ${
                     activeProduct?.id === product.id
-                      ? 'border-brand/50 bg-brand/5'
-                      : 'border-slate-200 dark:border-slate-800 bg-white/60 dark:bg-slate-900/60'
+                      ? 'border-brand/50 bg-brand/5 dark:bg-brand/10'
+                      : 'border-slate-200 dark:border-slate-800 bg-white/60 dark:bg-slate-900/60 hover:bg-white dark:hover:bg-slate-900'
                   }`}
                 >
                   <div className="flex items-center justify-between">
                     <div>
-                      <p className="font-semibold">{product.title}</p>
-                      <p className="text-sm text-slate-500">${(product.price / 100).toFixed(2)} · Stock {product.stock}</p>
+                      <p className="font-semibold text-slate-900 dark:text-white">{product.title}</p>
+                      <p className="text-sm text-slate-500 dark:text-slate-400">${(product.price / 100).toFixed(2)} · {product.stock} in stock</p>
                     </div>
-                    <span className="text-xs rounded-full border px-2 py-1 border-slate-200 dark:border-slate-800">{product.category}</span>
+                    <span className="text-xs rounded-full border border-slate-200 dark:border-slate-700 px-2 py-1 text-slate-600 dark:text-slate-300 font-semibold">{product.category}</span>
                   </div>
-                  <p className="text-xs text-slate-500 line-clamp-2 mt-2">{product.description}</p>
+                  <p className="text-xs text-slate-500 dark:text-slate-400 line-clamp-2 mt-2">{product.description}</p>
                 </motion.button>
               ))}
             </AnimatePresence>
           </div>
 
+          {/* EDIT PRODUCT SECTION */}
           {activeProduct && (
             <motion.div
               key={activeProduct.id}
@@ -245,26 +272,28 @@ export function ProductManager({ products }: ProductManagerProps) {
               initial={{ opacity: 0, x: 40 }}
               animate={{ opacity: 1, x: 0 }}
               exit={{ opacity: 0, x: 40 }}
-              className="rounded-2xl border border-slate-200 dark:border-slate-800 p-4 space-y-3 bg-white/70 dark:bg-slate-900/60 shadow-xl"
+              className="rounded-2xl border border-slate-200 dark:border-slate-800 p-6 space-y-4 bg-white/70 dark:bg-slate-900/70 shadow-xl"
             >
-              <div className="flex items-center justify-between">
+              <div className="flex items-center justify-between border-b border-slate-200 dark:border-slate-700 pb-4">
                 <div>
-                  <p className="font-semibold">Editing {activeProduct.title}</p>
-                  <p className="text-xs text-slate-500">ID: {activeProduct.id}</p>
+                  <p className="font-bold text-lg text-slate-900 dark:text-white">✏️ Editing</p>
+                  <p className="text-sm text-slate-600 dark:text-slate-400">{activeProduct.title}</p>
                 </div>
                 <button
                   onClick={() => handleDelete(activeProduct.id)}
-                  className="text-sm text-red-500 hover:text-red-600"
+                  className="text-sm px-3 py-1.5 rounded-lg bg-red-50 dark:bg-red-900/30 text-red-600 dark:text-red-400 font-semibold hover:bg-red-100 dark:hover:bg-red-900/50 transition"
                 >
                   Delete
                 </button>
               </div>
-              <div className="grid gap-2 md:grid-cols-2">
-                {statusList.map((key) => (
-                  <label key={key} className="space-y-1 text-sm">
-                    <span className="capitalize font-medium">{key.replace('Url', ' URL')}</span>
+
+              {/* Text input fields */}
+              <div className="grid gap-3 md:grid-cols-2">
+                {inputFields.map((key) => (
+                  <label key={key} className="space-y-2 text-sm">
+                    <span className="capitalize font-medium block text-slate-700 dark:text-slate-200">{key.replace('Url', ' URL')}</span>
                     <input
-                      className="w-full rounded-lg border border-slate-200 dark:border-slate-800 bg-transparent px-3 py-2"
+                      className="w-full rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 px-3 py-2.5 text-slate-900 dark:text-white placeholder:text-slate-400 focus:ring-2 focus:ring-brand/60 focus:border-transparent transition"
                       value={(editing[activeProduct.id] as any)?.[key] ?? ''}
                       onChange={(e) =>
                         setEditing((prev) => ({
@@ -276,34 +305,32 @@ export function ProductManager({ products }: ProductManagerProps) {
                   </label>
                 ))}
               </div>
-              <label className="flex flex-col gap-2 text-sm border border-dashed border-slate-300 dark:border-slate-700 rounded-xl p-3">
-                <span className="font-medium flex items-center gap-2"><UploadCloud className="h-4 w-4" /> Upload images or videos</span>
-                <input
-                  type="file"
-                  accept="image/*,video/*"
-                  multiple
-                  onChange={async (e) => {
-                    const buffered = await bufferFiles(e.target.files);
-                    setMediaUploads((prev) => ({
+
+              {/* Media Gallery */}
+              <div className="space-y-2">
+                <label className="text-sm font-medium block text-slate-700 dark:text-slate-200">Product Media (Images & Videos)</label>
+                <MediaGallery
+                  media={editingMedia[activeProduct.id] || []}
+                  onMediaChange={(newMedia) => {
+                    setEditingMedia(prev => ({
                       ...prev,
-                      [activeProduct.id]: [...(prev[activeProduct.id] || []), ...buffered]
+                      [activeProduct.id]: newMedia
                     }));
                   }}
+                  onUpload={bufferFiles}
                 />
-                <span className="text-xs text-slate-500">New uploads append to the gallery when you save.</span>
-              </label>
+              </div>
+
               <button
                 onClick={() => handleUpdate(activeProduct.id)}
-                className="px-4 py-2 rounded-full bg-slate-900 text-white dark:bg-white dark:text-slate-900 font-semibold"
+                className="w-full px-4 py-2.5 rounded-xl bg-brand text-white font-semibold shadow-lg hover:shadow-xl hover:-translate-y-0.5 transition"
               >
-                Save changes
+                💾 Save changes
               </button>
             </motion.div>
           )}
         </div>
       </div>
-
-      {message && <p className="text-sm text-slate-500">{message}</p>}
     </div>
   );
 }

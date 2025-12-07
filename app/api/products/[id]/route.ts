@@ -18,6 +18,7 @@ export async function PUT(req: Request, { params }: Params) {
   const body = await req.json();
   const parsed = productSchema.safeParse(body);
   if (!parsed.success) return NextResponse.json({ message: parsed.error.message }, { status: 400 });
+  
   const updated = await prisma.product.update({
     where: { id: params.id },
     data: {
@@ -28,8 +29,29 @@ export async function PUT(req: Request, { params }: Params) {
       stock: parsed.data.stock,
       heroImage: parsed.data.heroImage,
       modelUrl: parsed.data.modelUrl
-    }
+    },
+    include: { images: true }
   });
+  
+  // Handle media updates if provided
+  if (parsed.data.media) {
+    // Delete existing images and recreate with new media
+    await prisma.productImage.deleteMany({ where: { productId: params.id } });
+    await prisma.productImage.createMany({
+      data: parsed.data.media.map((media) => ({
+        productId: params.id,
+        url: media.url,
+        type: media.type,
+        order: media.order ?? 0
+      }))
+    });
+    
+    // Refetch product with updated images
+    return NextResponse.json(
+      await prisma.product.findUnique({ where: { id: params.id }, include: { images: true } })
+    );
+  }
+  
   return NextResponse.json(updated);
 }
 

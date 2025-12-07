@@ -7,6 +7,13 @@ export const signupSchema = z.object({
   acceptTerms: z.boolean().refine((val) => val === true, 'Terms must be accepted')
 });
 
+export const mediaItemSchema = z.object({
+  id: z.string(),
+  url: z.string(),
+  type: z.enum(['image', 'video']),
+  order: z.number().int().nonnegative()
+});
+
 export const productSchema = z.object({
   title: z.string().min(3),
   description: z.string().min(10),
@@ -15,7 +22,8 @@ export const productSchema = z.object({
   stock: z.number().int().nonnegative(),
   heroImage: z.string().url(),
   modelUrl: z.string().url().optional(),
-  images: z.array(z.string().url()).optional()
+  images: z.array(z.string().url()).optional(),
+  media: z.array(mediaItemSchema).optional()
 });
 
 export const addressSchema = z.object({
