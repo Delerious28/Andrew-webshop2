@@ -2,7 +2,7 @@ import { prisma } from '@/lib/prisma';
 import { NextResponse } from 'next/server';
 import { signupSchema } from '@/lib/validators';
 import { hash } from 'bcryptjs';
-import { sendMail } from '@/lib/mailer';
+import { sendVerificationEmail } from '@/lib/mailer';
 import crypto from 'crypto';
 
 export async function POST(req: Request) {
@@ -27,12 +27,12 @@ export async function POST(req: Request) {
     }
   });
 
-  const verifyLink = `${process.env.APP_BASE_URL}/verify?token=${verificationToken}`;
-  await sendMail({
-    to: parsed.data.email,
-    subject: 'Verify your Remoof account',
-    html: `<p>Welcome to Remoof!</p><p>Confirm your email to start ordering: <a href="${verifyLink}">${verifyLink}</a></p>`
-  });
+  try {
+    await sendVerificationEmail(parsed.data.email, parsed.data.name, verificationToken);
+  } catch (error) {
+    console.error('Failed to send verification email:', error);
+    // Don't fail account creation if email fails, but log it
+  }
 
   return NextResponse.json({ message: 'Account created. Check your email to verify.' });
 }

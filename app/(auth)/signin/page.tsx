@@ -30,7 +30,7 @@ export default function SigninPage() {
         <input name="email" type="email" placeholder="Email" className="w-full rounded-lg border border-slate-200 dark:border-slate-800 bg-transparent px-3 py-2" required />
         <input name="password" type="password" placeholder="Password" className="w-full rounded-lg border border-slate-200 dark:border-slate-800 bg-transparent px-3 py-2" required />
         <button disabled={loading} className="w-full bg-brand text-white py-2 rounded-lg font-semibold">{loading ? 'Signing in...' : 'Sign in'}</button>
-        <a href="/reset" className="text-sm text-brand">Forgot password?</a>
+        <a href="/forgot-password" className="text-sm text-brand">Forgot password?</a>
         {error && <p className="text-sm text-red-500">{error}</p>}
       </form>
     </div>
