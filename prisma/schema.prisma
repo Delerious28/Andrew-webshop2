@@ -3,8 +3,21 @@ generator client {
 }
 
 datasource db {
-  provider = "sqlite"
+  provider = "postgresql"
   url      = env("DATABASE_URL")
+}
+
+enum Role {
+  USER
+  ADMIN
+}
+
+enum OrderStatus {
+  PENDING
+  PAID
+  SHIPPED
+  DELIVERED
+  CANCELLED
 }
 
 model User {
@@ -12,7 +25,7 @@ model User {
   email             String    @unique
   name              String
   password          String
-  role              String    @default("USER")
+  role              Role      @default(USER)
   emailVerified     DateTime?
   verificationToken String?
   resetToken        String?
