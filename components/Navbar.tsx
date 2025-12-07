@@ -3,7 +3,6 @@ import { ThemeToggle } from './ThemeToggle';
 import { ShoppingBag, ShieldCheck } from 'lucide-react';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth';
-import { ProfileMenu } from './ProfileMenu';
 
 export async function Navbar() {
   const session = await getServerSession(authOptions);
@@ -28,9 +27,7 @@ export async function Navbar() {
           <Link href="/cart" className="rounded-full border border-slate-200 dark:border-slate-800 p-2 hover:bg-slate-100 dark:hover:bg-slate-900">
             <ShoppingBag className="h-5 w-5" />
           </Link>
-          {session ? (
-            <ProfileMenu name={session.user?.name} />
-          ) : (
+          {!session && (
             <Link href="/signin" className="text-sm font-medium hover:text-brand">Sign in</Link>
           )}
           {role === 'ADMIN' && (
