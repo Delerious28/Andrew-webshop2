@@ -26,8 +26,6 @@ export async function POST(req: Request) {
       price: parsed.data.price,
       category: parsed.data.category,
       stock: parsed.data.stock,
-      heroImage: parsed.data.heroImage,
-      modelUrl: parsed.data.modelUrl,
       images: mediaToCreate.length > 0 ? {
         create: mediaToCreate.map((media) => ({
           url: media.url,

@@ -28,7 +28,7 @@ export async function POST(req: Request) {
     user: {
       id: user.id,
       email: user.email,
-      name: user.name
+      name: `${user.firstName} ${user.lastName}`
     }
   });
 }

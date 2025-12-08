@@ -15,6 +15,7 @@ export async function GET(req: Request, { params }: { params: { id: string } }) 
   const user = await prisma.user.findUnique({
     where: { id: params.id },
     include: {
+      addresses: true,
       orders: {
         select: {
           id: true,
@@ -48,10 +49,11 @@ export async function PUT(req: Request, { params }: { params: { id: string } }) 
   }
 
   const body = await req.json();
-  const { name, email, role, password } = body;
+  const { firstName, lastName, email, role, password } = body;
 
   const updateData: any = {};
-  if (name) updateData.name = name;
+  if (firstName) updateData.firstName = firstName;
+  if (lastName) updateData.lastName = lastName;
   if (email) updateData.email = email;
   if (role) updateData.role = role;
   if (password) {
@@ -65,7 +67,8 @@ export async function PUT(req: Request, { params }: { params: { id: string } }) 
       select: {
         id: true,
         email: true,
-        name: true,
+        firstName: true,
+        lastName: true,
         role: true,
         emailVerified: true,
         createdAt: true

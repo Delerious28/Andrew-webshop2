@@ -5,17 +5,29 @@ import { useRouter, useParams } from 'next/navigation';
 import { useSession } from 'next-auth/react';
 import { 
   ArrowLeft, User, Mail, Shield, Calendar, CheckCircle, XCircle, 
-  Edit2, Trash2, Save, X, ShoppingBag, DollarSign 
+  Edit2, Trash2, Save, X, ShoppingBag, DollarSign, MapPin 
 } from 'lucide-react';
+
+interface Address {
+  id: string;
+  line1: string;
+  line2: string | null;
+  city: string;
+  state: string;
+  postal: string;
+  country: string;
+}
 
 interface UserDetails {
   id: string;
   email: string;
-  name: string;
+  firstName: string;
+  lastName: string;
   role: string;
   emailVerified: Date | null;
   createdAt: Date;
   verificationToken: string | null;
+  addresses?: Address[];
   orders?: Array<{
     id: string;
     total: number;
@@ -36,7 +48,8 @@ export default function UserDetailPage() {
   const [deleting, setDeleting] = useState(false);
   
   // Edit form state
-  const [editName, setEditName] = useState('');
+  const [editFirstName, setEditFirstName] = useState('');
+  const [editLastName, setEditLastName] = useState('');
   const [editEmail, setEditEmail] = useState('');
   const [editRole, setEditRole] = useState('');
   const [editPassword, setEditPassword] = useState('');
@@ -63,7 +76,8 @@ export default function UserDetailPage() {
       const data = await res.json();
       if (data.user) {
         setUser(data.user);
-        setEditName(data.user.name || '');
+        setEditFirstName(data.user.firstName || '');
+        setEditLastName(data.user.lastName || '');
         setEditEmail(data.user.email);
         setEditRole(data.user.role);
       }
@@ -77,7 +91,8 @@ export default function UserDetailPage() {
   const handleUpdate = async () => {
     try {
       const updateData: any = {
-        name: editName,
+        firstName: editFirstName,
+        lastName: editLastName,
         email: editEmail,
         role: editRole
       };
@@ -169,11 +184,11 @@ export default function UserDetailPage() {
           <div className="bg-gradient-to-r from-blue-600 to-blue-700 px-6 py-8">
             <div className="flex items-center gap-4">
               <div className="h-20 w-20 rounded-full bg-white/20 backdrop-blur-sm flex items-center justify-center text-white font-bold text-3xl">
-                {user.name?.charAt(0).toUpperCase() || user.email.charAt(0).toUpperCase()}
+                {user.firstName?.charAt(0).toUpperCase() || user.email.charAt(0).toUpperCase()}
               </div>
               <div>
                 <h1 className="text-2xl font-bold text-white mb-1">
-                  {user.name || 'No name set'}
+                  {user.firstName} {user.lastName}
                 </h1>
                 <p className="text-blue-100">{user.email}</p>
               </div>
@@ -188,13 +203,24 @@ export default function UserDetailPage() {
                 <div className="grid md:grid-cols-2 gap-6 mb-6">
                   <div>
                     <label className="block text-sm font-medium text-slate-500 dark:text-slate-400 mb-1">
-                      Full Name
+                      First Name
                     </label>
                     <div className="flex items-center gap-2">
                       <User className="h-5 w-5 text-slate-400" />
                       <span className="text-slate-900 dark:text-white font-medium">
-                        {user.name || 'Not set'}
+                        {user.firstName}
                       </span>
+                                      <div>
+                                        <label className="block text-sm font-medium text-slate-500 dark:text-slate-400 mb-1">
+                                          Last Name
+                                        </label>
+                                        <div className="flex items-center gap-2">
+                                          <User className="h-5 w-5 text-slate-400" />
+                                          <span className="text-slate-900 dark:text-white font-medium">
+                                            {user.lastName}
+                                          </span>
+                                        </div>
+                                      </div>
                     </div>
                   </div>
 
@@ -291,12 +317,23 @@ export default function UserDetailPage() {
                 <div className="space-y-4 mb-6">
                   <div>
                     <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">
-                      Full Name
+                      First Name
                     </label>
                     <input
                       type="text"
-                      value={editName}
-                      onChange={(e) => setEditName(e.target.value)}
+                      value={editFirstName}
+                      onChange={(e) => setEditFirstName(e.target.value)}
+                      className="w-full px-4 py-2 rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-900 dark:text-white focus:ring-2 focus:ring-blue-500"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">
+                      Last Name
+                    </label>
+                    <input
+                      type="text"
+                      value={editLastName}
+                      onChange={(e) => setEditLastName(e.target.value)}
                       className="w-full px-4 py-2 rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-900 dark:text-white focus:ring-2 focus:ring-blue-500"
                     />
                   </div>
@@ -353,7 +390,8 @@ export default function UserDetailPage() {
                   <button
                     onClick={() => {
                       setEditing(false);
-                      setEditName(user.name || '');
+                      setEditFirstName(user.firstName || '');
+                      setEditLastName(user.lastName || '');
                       setEditEmail(user.email);
                       setEditRole(user.role);
                       setEditPassword('');
@@ -368,6 +406,39 @@ export default function UserDetailPage() {
             )}
           </div>
         </div>
+
+        {/* Addresses Section */}
+        {user.addresses && user.addresses.length > 0 && (
+          <div className="bg-white dark:bg-slate-900 rounded-2xl shadow-lg border border-slate-200 dark:border-slate-800 p-6">
+            <h2 className="text-xl font-bold text-slate-900 dark:text-white mb-4 flex items-center gap-2">
+              <MapPin className="h-6 w-6 text-blue-600" />
+              Shipping Addresses ({user.addresses.length})
+            </h2>
+            <div className="space-y-3">
+              {user.addresses.map((address) => (
+                <div
+                  key={address.id}
+                  className="p-4 rounded-lg bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700"
+                >
+                  <p className="font-medium text-slate-900 dark:text-white">
+                    {address.line1}
+                  </p>
+                  {address.line2 && (
+                    <p className="text-sm text-slate-600 dark:text-slate-400">
+                      {address.line2}
+                    </p>
+                  )}
+                  <p className="text-sm text-slate-600 dark:text-slate-400">
+                    {address.city}, {address.state} {address.postal}
+                  </p>
+                  <p className="text-sm text-slate-500 dark:text-slate-500">
+                    {address.country}
+                  </p>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
 
         {/* Orders Section */}
         {user.orders && user.orders.length > 0 && (

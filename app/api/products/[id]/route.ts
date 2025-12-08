@@ -26,9 +26,7 @@ export async function PUT(req: Request, { params }: Params) {
       description: parsed.data.description,
       price: parsed.data.price,
       category: parsed.data.category,
-      stock: parsed.data.stock,
-      heroImage: parsed.data.heroImage,
-      modelUrl: parsed.data.modelUrl
+      stock: parsed.data.stock
     },
     include: { images: true }
   });

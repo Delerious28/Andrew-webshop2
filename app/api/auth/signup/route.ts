@@ -20,7 +20,8 @@ export async function POST(req: Request) {
   await prisma.user.create({
     data: {
       email: parsed.data.email,
-      name: parsed.data.name,
+      firstName: parsed.data.firstName,
+      lastName: parsed.data.lastName,
       password,
       verificationToken,
       role: 'USER'
@@ -28,7 +29,11 @@ export async function POST(req: Request) {
   });
 
   try {
-    await sendVerificationEmail(parsed.data.email, parsed.data.name, verificationToken);
+    await sendVerificationEmail(
+      parsed.data.email,
+      `${parsed.data.firstName} ${parsed.data.lastName}`,
+      verificationToken
+    );
   } catch (error) {
     console.error('Failed to send verification email:', error);
     // Don't fail account creation if email fails, but log it

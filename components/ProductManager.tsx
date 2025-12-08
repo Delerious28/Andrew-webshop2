@@ -15,8 +15,6 @@ type EditableProduct = {
   price: number | string;
   category: string;
   stock: number | string;
-  heroImage: string;
-  modelUrl: string;
 };
 
 const defaultPayload: EditableProduct = {
@@ -24,9 +22,7 @@ const defaultPayload: EditableProduct = {
   description: '',
   price: 0,
   category: '',
-  stock: 0,
-  heroImage: '',
-  modelUrl: ''
+  stock: 0
 };
 
 type MediaItem = {
@@ -52,9 +48,7 @@ export function ProductManager({ products }: ProductManagerProps) {
         description: p.description,
         price: p.price,
         category: p.category,
-        stock: p.stock,
-        heroImage: p.heroImage,
-        modelUrl: p.modelUrl || ''
+        stock: p.stock
       };
       setEditingMedia(prev => ({
         ...prev,
@@ -69,7 +63,7 @@ export function ProductManager({ products }: ProductManagerProps) {
     return map;
   });
 
-  const statusList = useMemo(() => ['title', 'description', 'price', 'category', 'stock', 'heroImage', 'modelUrl'], []);
+  const statusList = useMemo(() => ['title', 'description', 'price', 'category', 'stock'], []);
 
   const bufferFiles = async (files: File[]) => {
     const readers = files.map(
@@ -170,7 +164,7 @@ export function ProductManager({ products }: ProductManagerProps) {
   const activeProduct = filtered.find((p) => p.id === activeId) ?? filtered[0] ?? list[0];
 
   // Fields to show in text input form (excluding media/image fields)
-  const inputFields = ['title', 'description', 'price', 'category', 'stock', 'heroImage', 'modelUrl'] as const;
+  const inputFields = ['title', 'description', 'price', 'category', 'stock'] as const;
 
   return (
     <div className="space-y-6">

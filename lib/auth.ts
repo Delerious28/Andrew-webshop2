@@ -25,7 +25,7 @@ export const authOptions: NextAuthOptions = {
         if (credentials.autoLogin === 'true') {
           const user = await prisma.user.findUnique({ where: { email: credentials.email } });
           if (!user || !user.emailVerified) return null;
-          return { id: user.id, email: user.email, name: user.name, role: user.role } as any;
+          return { id: user.id, email: user.email, name: `${user.firstName} ${user.lastName}`, role: user.role } as any;
         }
         
         // Normal login flow
@@ -37,7 +37,7 @@ export const authOptions: NextAuthOptions = {
         if (!user.emailVerified) {
           throw new Error('Please verify your email before signing in.');
         }
-        return { id: user.id, email: user.email, name: user.name, role: user.role } as any;
+        return { id: user.id, email: user.email, name: `${user.firstName} ${user.lastName}`, role: user.role } as any;
       }
     })
   ],

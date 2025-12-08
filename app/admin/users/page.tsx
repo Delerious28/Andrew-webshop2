@@ -8,7 +8,8 @@ import { Users, Search, Shield, Mail, Calendar, CheckCircle, XCircle } from 'luc
 interface User {
   id: string;
   email: string;
-  name: string;
+  firstName: string;
+  lastName: string;
   role: string;
   emailVerified: Date | null;
   createdAt: Date;
@@ -52,7 +53,7 @@ export default function AdminUsersPage() {
   };
 
   const filteredUsers = users.filter(user =>
-    user.name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    `${user.firstName} ${user.lastName}`.toLowerCase().includes(searchTerm.toLowerCase()) ||
     user.email.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
@@ -105,11 +106,11 @@ export default function AdminUsersPage() {
               {/* User Avatar */}
               <div className="flex items-center gap-4 mb-4">
                 <div className="h-12 w-12 rounded-full bg-gradient-to-br from-blue-500 to-blue-600 flex items-center justify-center text-white font-bold text-lg">
-                  {user.name?.charAt(0).toUpperCase() || user.email.charAt(0).toUpperCase()}
+                  {user.firstName?.charAt(0).toUpperCase() || user.email.charAt(0).toUpperCase()}
                 </div>
                 <div className="flex-1 min-w-0">
                   <h3 className="font-semibold text-slate-900 dark:text-white truncate">
-                    {user.name || 'No name'}
+                    {user.firstName} {user.lastName}
                   </h3>
                   <p className="text-sm text-slate-500 dark:text-slate-400 truncate">
                     {user.email}

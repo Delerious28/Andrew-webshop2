@@ -22,7 +22,7 @@ export async function POST(req: Request) {
   });
 
   try {
-    await sendPasswordResetEmail(email, user.name, resetToken);
+    await sendPasswordResetEmail(email, `${user.firstName} ${user.lastName}`, resetToken);
   } catch (error) {
     console.error('Failed to send password reset email:', error);
   }

@@ -1,7 +1,8 @@
 import { z } from 'zod';
 
 export const signupSchema = z.object({
-  name: z.string().min(2),
+  firstName: z.string().min(2, 'First name is required'),
+  lastName: z.string().min(2, 'Last name is required'),
   email: z.string().email(),
   password: z.string().min(8),
   acceptTerms: z.boolean().refine((val) => val === true, 'Terms must be accepted')
@@ -20,8 +21,6 @@ export const productSchema = z.object({
   price: z.number().int().positive(),
   category: z.string().min(2),
   stock: z.number().int().nonnegative(),
-  heroImage: z.string().url(),
-  modelUrl: z.string().url().optional(),
   images: z.array(z.string().url()).optional(),
   media: z.array(mediaItemSchema).optional()
 });

@@ -8,13 +8,15 @@ import Link from 'next/link';
 interface AuthModalProps {
   isOpen: boolean;
   onClose: () => void;
+  initialMode?: 'login' | 'signup';
 }
 
-export function AuthModal({ isOpen, onClose }: AuthModalProps) {
-  const [mode, setMode] = useState<'login' | 'signup'>('login');
+export function AuthModal({ isOpen, onClose, initialMode = 'login' }: AuthModalProps) {
+  const [mode, setMode] = useState<'login' | 'signup'>(initialMode);
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
-  const [name, setName] = useState('');
+  const [firstName, setFirstName] = useState('');
+  const [lastName, setLastName] = useState('');
   const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
@@ -48,7 +50,7 @@ export function AuthModal({ isOpen, onClose }: AuthModalProps) {
       const res = await fetch('/api/auth/signup', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email, password, name, acceptTerms: true })
+        body: JSON.stringify({ email, password, firstName, lastName, acceptTerms: true })
       });
 
       const data = await res.json();
@@ -60,7 +62,8 @@ export function AuthModal({ isOpen, onClose }: AuthModalProps) {
         setMode('login');
         setPassword('');
         setEmail('');
-        setName('');
+        setFirstName('');
+        setLastName('');
         alert('Account created! Check your email to verify.');
       }
     } catch (err) {
@@ -96,17 +99,34 @@ export function AuthModal({ isOpen, onClose }: AuthModalProps) {
           )}
 
           <form onSubmit={mode === 'login' ? handleLogin : handleSignup} className="space-y-4">
-            {/* Name field - only for signup */}
+            {/* First Name field - only for signup */}
             {mode === 'signup' && (
               <div>
                 <label className="block text-sm font-medium text-slate-700 dark:text-slate-200 mb-2">
-                  Full Name
+                  First Name
                 </label>
                 <input
                   type="text"
-                  value={name}
-                  onChange={(e) => setName(e.target.value)}
-                  placeholder="John Doe"
+                  value={firstName}
+                  onChange={(e) => setFirstName(e.target.value)}
+                  placeholder="John"
+                  required={mode === 'signup'}
+                  className="w-full px-4 py-2.5 rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-900 dark:text-white placeholder:text-slate-400 focus:ring-2 focus:ring-blue-500 focus:border-transparent transition"
+                />
+              </div>
+            )}
+
+            {/* Last Name field - only for signup */}
+            {mode === 'signup' && (
+              <div>
+                <label className="block text-sm font-medium text-slate-700 dark:text-slate-200 mb-2">
+                  Last Name
+                </label>
+                <input
+                  type="text"
+                  value={lastName}
+                  onChange={(e) => setLastName(e.target.value)}
+                  placeholder="Doe"
                   required={mode === 'signup'}
                   className="w-full px-4 py-2.5 rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-900 dark:text-white placeholder:text-slate-400 focus:ring-2 focus:ring-blue-500 focus:border-transparent transition"
                 />

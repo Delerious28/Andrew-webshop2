@@ -3,7 +3,7 @@ import { useState } from 'react';
 import { Order, OrderItem, Address, Product } from '@prisma/client';
 
 interface AdminOrdersProps {
-  orders: (Order & { address: Address; user: { name: string | null; email: string | null }; items: (OrderItem & { product: Product })[] })[];
+  orders: (Order & { address: Address; user: { firstName: string | null; lastName: string | null; email: string | null }; items: (OrderItem & { product: Product })[] })[];
 }
 
 const statuses = ['PENDING', 'PAID', 'SHIPPED', 'DELIVERED', 'CANCELLED'];
@@ -35,7 +35,7 @@ export function AdminOrders({ orders }: AdminOrdersProps) {
           <div className="flex flex-wrap items-center justify-between gap-3">
             <div>
               <p className="font-semibold">Order #{order.id.slice(-6)}</p>
-              <p className="text-sm text-slate-500">{order.user.name} · {order.user.email}</p>
+              <p className="text-sm text-slate-500">{order.user.firstName} {order.user.lastName} · {order.user.email}</p>
               <p className="text-xs text-slate-500">Ship to: {order.address.line1}, {order.address.city}</p>
             </div>
             <div className="flex items-center gap-2">

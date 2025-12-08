@@ -14,7 +14,7 @@ export default async function AdminPage() {
     prisma.order.findMany({
       include: {
         address: true,
-        user: { select: { name: true, email: true } },
+        user: { select: { firstName: true, lastName: true, email: true } },
         items: { include: { product: true } }
       },
       orderBy: { createdAt: 'desc' }
