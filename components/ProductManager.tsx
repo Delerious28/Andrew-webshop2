@@ -1,9 +1,10 @@
 'use client';
-import { useMemo, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { Product, ProductImage } from '@prisma/client';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Search } from 'lucide-react';
 import { MediaGallery } from './MediaGallery';
+import { useNotifications } from './NotificationCenter';
 
 interface ProductManagerProps {
   products: (Product & { images: ProductImage[] })[];
@@ -33,15 +34,18 @@ type MediaItem = {
 };
 
 export function ProductManager({ products }: ProductManagerProps) {
+  const { notify } = useNotifications();
   const [list, setList] = useState(products);
   const [newProduct, setNewProduct] = useState(defaultPayload);
   const [newProductMedia, setNewProductMedia] = useState<MediaItem[]>([]);
-  const [message, setMessage] = useState<string | null>(null);
   const [editingMedia, setEditingMedia] = useState<Record<string, MediaItem[]>>({});
   const [query, setQuery] = useState('');
   const [activeId, setActiveId] = useState<string | null>(products[0]?.id ?? null);
-  const [editing, setEditing] = useState<Record<string, EditableProduct>>(() => {
+  const [editing, setEditing] = useState<Record<string, EditableProduct>>({});
+
+  useEffect(() => {
     const map: Record<string, EditableProduct> = {};
+    const mediaMap: Record<string, MediaItem[]> = {};
     products.forEach((p) => {
       map[p.id] = {
         title: p.title,
@@ -50,18 +54,20 @@ export function ProductManager({ products }: ProductManagerProps) {
         category: p.category,
         stock: p.stock
       };
-      setEditingMedia(prev => ({
-        ...prev,
-        [p.id]: p.images.sort((a, b) => a.order - b.order).map(img => ({
+      mediaMap[p.id] = p.images
+        .sort((a, b) => a.order - b.order)
+        .map((img) => ({
           id: img.id,
           url: img.url,
           type: img.type as 'image' | 'video',
           order: img.order
-        }))
-      }));
+        }));
     });
-    return map;
-  });
+    setEditing(map);
+    setEditingMedia(mediaMap);
+    setActiveId(products[0]?.id ?? null);
+    setList(products);
+  }, [products]);
 
   const statusList = useMemo(() => ['title', 'description', 'price', 'category', 'stock'], []);
 
@@ -87,7 +93,6 @@ export function ProductManager({ products }: ProductManagerProps) {
 
   const handleCreate = async (e: React.FormEvent) => {
     e.preventDefault();
-    setMessage(null);
     const res = await fetch('/api/products', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
@@ -104,15 +109,14 @@ export function ProductManager({ products }: ProductManagerProps) {
       setList((prev) => [...prev, { ...created, images: [] }]);
       setNewProduct(defaultPayload);
       setNewProductMedia([]);
-      setMessage('Product created.');
+      notify({ title: 'Product published', message: `${created.title} is now live.`, tone: 'success' });
     } else {
       const data = await res.json();
-      setMessage(data.message || 'Unable to create product');
+      notify({ title: 'Unable to create product', message: data.message || 'Please try again.', tone: 'warning' });
     }
   };
 
   const handleUpdate = async (id: string) => {
-    setMessage(null);
     const payload = editing[id];
     const media = editingMedia[id] || [];
     const res = await fetch(`/api/products/${id}`, {
@@ -129,15 +133,14 @@ export function ProductManager({ products }: ProductManagerProps) {
     if (res.ok) {
       const updated = await res.json();
       setList((prev) => prev.map((p) => (p.id === id ? { ...updated, images: p.images } : p)));
-      setMessage('Product updated.');
+      notify({ title: 'Product updated', message: `${updated.title} saved successfully.`, tone: 'success' });
     } else {
       const data = await res.json();
-      setMessage(data.message || 'Unable to update product');
+      notify({ title: 'Unable to update product', message: data.message || 'Please try again.', tone: 'warning' });
     }
   };
 
   const handleDelete = async (id: string) => {
-    setMessage(null);
     const res = await fetch(`/api/products/${id}`, { method: 'DELETE' });
     if (res.ok) {
       setList((prev) => prev.filter((p) => p.id !== id));
@@ -146,10 +149,10 @@ export function ProductManager({ products }: ProductManagerProps) {
         delete clone[id];
         return clone;
       });
-      setMessage('Product deleted.');
+      notify({ title: 'Product deleted', message: 'Removed from catalogue.', tone: 'warning' });
     } else {
       const data = await res.json();
-      setMessage(data.message || 'Unable to delete product');
+      notify({ title: 'Unable to delete product', message: data.message || 'Please try again.', tone: 'warning' });
     }
   };
 

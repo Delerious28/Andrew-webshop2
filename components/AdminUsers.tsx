@@ -5,6 +5,7 @@ import { Search, Edit2, Trash2 } from 'lucide-react';
 import { useMemo, useState } from 'react';
 import { Address, Order, User } from '@prisma/client';
 import { useRouter } from 'next/navigation';
+import { useNotifications } from './NotificationCenter';
 
 interface AdminUsersProps {
   users: (User & { addresses: Address[]; orders: Order[] })[];
@@ -15,6 +16,7 @@ export function AdminUsers({ users: initialUsers }: AdminUsersProps) {
   const [query, setQuery] = useState('');
   const [users, setUsers] = useState(initialUsers);
   const [deleting, setDeleting] = useState<string | null>(null);
+  const { notify } = useNotifications();
 
   const filtered = useMemo(() => {
     const normalized = query.toLowerCase();
@@ -42,12 +44,13 @@ export function AdminUsers({ users: initialUsers }: AdminUsersProps) {
 
       if (res.ok) {
         setUsers(users.filter(u => u.id !== userId));
+        notify({ title: 'Account deleted', message: `${userName} has been removed.`, tone: 'warning' });
       } else {
         const data = await res.json();
-        alert(data.message || 'Failed to delete user');
+        notify({ title: 'Unable to delete user', message: data.message || 'Please try again.', tone: 'warning' });
       }
     } catch (error) {
-      alert('Failed to delete user');
+      notify({ title: 'Failed to delete user', message: 'Network error. Try again.', tone: 'warning' });
     } finally {
       setDeleting(null);
     }

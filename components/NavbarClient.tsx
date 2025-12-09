@@ -7,6 +7,7 @@ import { ThemeToggle } from './ThemeToggle';
 import { ShoppingBag, ShieldCheck, LogOut, User } from 'lucide-react';
 import { AuthModal } from './AuthModal';
 import { Session } from 'next-auth';
+import { useCart } from './cart/CartProvider';
 
 interface NavbarClientProps {
   session: Session | null;
@@ -16,13 +17,23 @@ interface NavbarClientProps {
 export function NavbarClient({ session, role }: NavbarClientProps) {
   const [isAuthModalOpen, setIsAuthModalOpen] = useState(false);
   const [isProfileMenuOpen, setIsProfileMenuOpen] = useState(false);
+  const { items } = useCart();
+  const cartCount = items.reduce((sum, item) => sum + item.quantity, 0);
 
   return (
     <>
       <div className="flex items-center gap-3">
         <ThemeToggle />
-        <Link href="/cart" className="rounded-full border border-slate-200 dark:border-slate-800 p-2 hover:bg-slate-100 dark:hover:bg-slate-900">
+        <Link
+          href="/cart"
+          className="relative rounded-full border border-slate-200 dark:border-slate-800 p-2 hover:bg-slate-100 dark:hover:bg-slate-900"
+        >
           <ShoppingBag className="h-5 w-5" />
+          {cartCount > 0 && (
+            <span className="absolute -right-1 -top-1 h-5 min-w-[20px] rounded-full bg-brand text-[11px] font-semibold text-white grid place-items-center px-1">
+              {cartCount}
+            </span>
+          )}
         </Link>
 
         {!session ? (
