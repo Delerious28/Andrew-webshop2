@@ -3,8 +3,9 @@ import Link from 'next/link';
 import { useSession } from 'next-auth/react';
 import { ProductCard } from '@/components/ProductCard';
 import { AuthModal } from '@/components/AuthModal';
-import { ArrowRight, ShieldCheck, Truck } from 'lucide-react';
+import { ArrowRight, ShieldCheck, Sparkles, Truck } from 'lucide-react';
 import { useState, useEffect } from 'react';
+import { motion } from 'framer-motion';
 
 export default function HomePage() {
   const { data: session } = useSession();
@@ -27,38 +28,75 @@ export default function HomePage() {
   return (
     <>
       <AuthModal isOpen={showAuthModal} onClose={() => setShowAuthModal(false)} initialMode="signup" />
-      <div className="space-y-12">
-        <section className="grid md:grid-cols-2 gap-10">
-          <div className="flex flex-col space-y-6">
-            <h1 className="text-4xl md:text-5xl font-bold leading-tight">Precision bicycle parts built for speed and endurance.</h1>
-            <p className="inline-flex items-center gap-2 px-3 py-1 rounded-full border border-brand/30 text-brand bg-brand/10 text-sm font-semibold">
-              Remoof · Modern cycling hardware
-            </p>
+      <div className="space-y-16">
+        <section className="grid md:grid-cols-2 gap-10 items-center">
+          <motion.div
+            initial={{ opacity: 0, y: 30 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.5 }}
+            className="flex flex-col space-y-6"
+          >
+            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full border border-brand/30 text-brand bg-brand/10 text-sm font-semibold w-fit">
+              <Sparkles className="h-4 w-4" /> Remoof · Modern cycling hardware
+            </div>
+            <h1 className="text-4xl md:text-5xl font-bold leading-tight">
+              Precision bicycle parts built for speed and endurance.
+            </h1>
             <p className="text-lg text-slate-600 dark:text-slate-300 max-w-xl">
               Remoof delivers carbon-grade components, verified payments, and immersive 3D previews to remove doubt before you ride.
             </p>
-            <div className="flex gap-4">
-              <Link href="/products" className="px-4 py-2 bg-brand text-white rounded-full shadow">Browse products</Link>
+            <div className="flex flex-wrap gap-4">
+              <Link
+                href="/products"
+                className="px-5 py-3 bg-brand text-white rounded-xl shadow-lg hover:shadow-2xl hover:-translate-y-0.5 transition"
+              >
+                Browse products
+              </Link>
               {!session && (
-                <button onClick={() => setShowAuthModal(true)} className="px-4 py-2 border border-slate-200 dark:border-slate-800 rounded-full hover:-translate-y-0.5 transition">Create account</button>
+                <button
+                  onClick={() => setShowAuthModal(true)}
+                  className="px-5 py-3 border border-slate-200 dark:border-slate-800 rounded-xl hover:-translate-y-0.5 transition bg-white/70 dark:bg-slate-900/70"
+                >
+                  Create account
+                </button>
               )}
             </div>
-            <div className="flex gap-6 text-sm text-slate-600 dark:text-slate-300">
-              <span className="flex items-center gap-2"><Truck className="h-4 w-4" /> Worldwide delivery</span>
-              <span className="flex items-center gap-2"><ShieldCheck className="h-4 w-4" /> 2-year guarantee</span>
+            <div className="grid grid-cols-2 gap-4 text-sm text-slate-600 dark:text-slate-300">
+              <div className="rounded-2xl border border-slate-200 dark:border-slate-800 p-3 flex items-center gap-3 bg-white/70 dark:bg-slate-900/70">
+                <Truck className="h-4 w-4 text-brand" />
+                <span>Worldwide delivery with live tracking</span>
+              </div>
+              <div className="rounded-2xl border border-slate-200 dark:border-slate-800 p-3 flex items-center gap-3 bg-white/70 dark:bg-slate-900/70">
+                <ShieldCheck className="h-4 w-4 text-brand" />
+                <span>2-year guarantee & secure Stripe checkout</span>
+              </div>
             </div>
-          </div>
-          <div className="glass-card p-8 space-y-6">
-            <p className="text-sm text-slate-500">Featured</p>
-            {featured && <ProductCard product={featured} />}
+          </motion.div>
+          <motion.div
+            initial={{ opacity: 0, y: 30 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.6, delay: 0.1 }}
+            className="glass-card p-8 space-y-6"
+          >
+            <div className="flex items-center justify-between">
+              <p className="text-sm text-slate-500">Featured</p>
+              <span className="text-xs px-3 py-1 rounded-full bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-200">New drop</span>
+            </div>
+            {featured && <ProductCard product={featured} accent />}
             <Link href="/products" className="flex items-center gap-2 text-brand font-semibold">All products <ArrowRight className="h-4 w-4" /></Link>
-          </div>
+          </motion.div>
         </section>
         <section className="space-y-6">
-          <h2 className="text-2xl font-bold">Latest Items</h2>
+          <div className="flex items-center justify-between">
+            <h2 className="text-2xl font-bold">Latest Items</h2>
+            <div className="flex gap-2 text-xs text-slate-500">
+              <span className="px-3 py-1 rounded-full bg-white/70 dark:bg-slate-900/60 border border-slate-200 dark:border-slate-800">3D previews</span>
+              <span className="px-3 py-1 rounded-full bg-white/70 dark:bg-slate-900/60 border border-slate-200 dark:border-slate-800">Stripe-ready</span>
+            </div>
+          </div>
           <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
             {latest.map((product) => (
-              <ProductCard key={product.id} product={product} />
+              <ProductCard key={product.id} product={product} accent />
             ))}
           </div>
         </section>
