@@ -76,12 +76,6 @@ export function NavbarClient({ session, role }: NavbarClientProps) {
             )}
           </div>
         )}
-
-        {role === 'ADMIN' && (
-          <Link href="/admin" className="flex items-center gap-1 text-sm font-semibold text-brand px-4 py-2 rounded-lg bg-brand/10 hover:bg-brand/20 transition">
-            <ShieldCheck className="h-4 w-4" /> Admin
-          </Link>
-        )}
       </div>
 
       <AuthModal isOpen={isAuthModalOpen} onClose={() => setIsAuthModalOpen(false)} />

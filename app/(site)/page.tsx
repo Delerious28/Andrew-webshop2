@@ -1,5 +1,6 @@
 'use client';
 import Link from 'next/link';
+import Image from 'next/image';
 import { useSession } from 'next-auth/react';
 import { ProductCard } from '@/components/ProductCard';
 import { AuthModal } from '@/components/AuthModal';
@@ -34,17 +35,20 @@ export default function HomePage() {
       <AuthModal isOpen={showAuthModal} onClose={() => setShowAuthModal(false)} initialMode="signup" />
       <PageShell>
         <div className="space-y-16">
-        <section className="grid md:grid-cols-2 gap-10 items-start">
+        <section className="grid gap-10 lg:grid-cols-[1.5fr_1fr] items-start">
           <motion.div
             initial={{ opacity: 0, y: 30 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.5 }}
-            className="flex flex-col space-y-6 max-w-xl h-fit"
+            className="flex flex-col space-y-6 max-w-xl"
           >
+            <div className="chip border-brand/40 text-brand bg-brand/10">
+              <Sparkles className="h-4 w-4" /> Remoof · Modern cycling hardware
+            </div>
             <h1 className="text-4xl md:text-5xl font-bold leading-tight">
               Precision bicycle parts built for speed and endurance.
             </h1>
-            <p className="text-lg text-slate-500 dark:text-slate-200 max-w-2xl">
+            <p className="text-lg text-slate-500 dark:text-slate-200 max-w-xl">
               Remoof delivers carbon-grade components, trusted checkout, and hands-on setup guidance to remove doubt before you ride.
             </p>
             <ul className="grid sm:grid-cols-3 gap-3 text-sm text-slate-600 dark:text-slate-200">
@@ -90,45 +94,78 @@ export default function HomePage() {
             initial={{ opacity: 0, y: 30 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.6, delay: 0.1 }}
-            className="card-surface p-6 space-y-4"
+            className="space-y-3 w-full max-w-md lg:justify-self-end"
           >
             <p className="text-xs font-semibold text-slate-500 dark:text-slate-300 tracking-wide uppercase">
               Featured upgrade · Perfect for endurance builds
             </p>
-            <div className="flex items-center justify-between">
-              <p className="text-sm font-semibold text-slate-700 dark:text-slate-200">Featured product</p>
-              <span className="chip bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-200 border-emerald-200/60 dark:border-emerald-700/50">New drop</span>
-            </div>
             {featured && (
-              <div className="space-y-4">
-                <ProductCard product={featured} accent showNewBadge specLine="140mm PWM fan · RGB ring" />
-                <div className="flex flex-wrap items-center gap-3">
-                  <button
-                    onClick={() => {
-                      if (!session) {
-                        setShowAuthModal(true);
-                        return;
-                      }
-                    if (addingFeatured) return;
-                    setAddingFeatured(true);
-                    addItem({
-                      productId: featured.id,
-                      title: featured.title,
-                      price: featured.price,
-                      quantity: 1,
-                      image: featured.images?.[0]?.url,
-                      category: featured.category
-                    });
-                    setTimeout(() => setAddingFeatured(false), 350);
-                    }}
-                    className="px-4 py-2 bg-brand text-white rounded-xl font-semibold shadow hover:-translate-y-0.5 transition disabled:opacity-70"
-                    disabled={addingFeatured}
-                  >
-                    {addingFeatured ? 'Adding…' : 'Add to cart'}
-                  </button>
-                  <Link href="/products" className="flex items-center gap-2 text-brand font-semibold">
-                    All products <ArrowRight className="h-4 w-4" />
-                  </Link>
+              <div className="card-surface p-6 space-y-4">
+                <div className="flex items-center justify-between">
+                  <p className="text-sm font-semibold text-slate-700 dark:text-slate-200">Featured product</p>
+                  <span className="chip bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-200 border-emerald-200/60 dark:border-emerald-700/50">New drop</span>
+                </div>
+                <div className="relative w-full aspect-[4/3] overflow-hidden rounded-2xl bg-gradient-to-br from-slate-50 to-slate-100 dark:from-slate-900 dark:to-slate-800">
+                  {featured.images?.[0]?.url ? (
+                    <Image
+                      src={featured.images[0].url}
+                      alt={featured.title}
+                      fill
+                      className="object-contain transition duration-500 hover:scale-[1.03]"
+                    />
+                  ) : (
+                    <div className="w-full h-full flex items-center justify-center text-slate-500">No image</div>
+                  )}
+                </div>
+                <div className="flex flex-wrap gap-2">
+                  <span className="chip text-xs">{featured.category}</span>
+                  <span className="chip bg-brand/10 text-brand border-brand/40">Endurance build</span>
+                </div>
+                <div className="space-y-1">
+                  <div className="flex items-start justify-between gap-2">
+                    <h3 className="text-xl font-semibold leading-snug text-slate-900 dark:text-white">{featured.title}</h3>
+                    <ArrowRight className="h-4 w-4 text-slate-400" />
+                  </div>
+                  <p className="text-sm text-slate-600 dark:text-slate-300 line-clamp-2">{featured.description}</p>
+                  <p className="text-xs text-slate-500 dark:text-slate-400">140mm PWM fan · RGB ring</p>
+                </div>
+                <div className="flex items-center justify-between text-sm text-slate-600 dark:text-slate-300">
+                  <div className="flex items-center gap-2">
+                    <span className={`h-2 w-2 rounded-full ${featured.stock > 0 ? 'bg-emerald-400' : 'bg-red-400'}`} />
+                    <span>{featured.stock > 0 ? `In stock · ${featured.stock} available` : 'Out of stock'}</span>
+                  </div>
+                  <span className="chip">Ships in 1–2 days</span>
+                </div>
+                <div className="flex items-center justify-between gap-3">
+                  <p className="text-2xl font-bold text-slate-900 dark:text-white">${(featured.price / 100).toFixed(2)}</p>
+                  <div className="flex items-center gap-3">
+                    <button
+                      onClick={() => {
+                        if (!session) {
+                          setShowAuthModal(true);
+                          return;
+                        }
+                        if (addingFeatured) return;
+                        setAddingFeatured(true);
+                        addItem({
+                          productId: featured.id,
+                          title: featured.title,
+                          price: featured.price,
+                          quantity: 1,
+                          image: featured.images?.[0]?.url,
+                          category: featured.category
+                        });
+                        setTimeout(() => setAddingFeatured(false), 350);
+                      }}
+                      className="px-4 py-2 bg-brand text-white rounded-xl font-semibold shadow hover:-translate-y-0.5 transition disabled:opacity-70"
+                      disabled={addingFeatured}
+                    >
+                      {addingFeatured ? 'Adding…' : 'Add to cart'}
+                    </button>
+                    <Link href={`/products/${featured.id}`} className="flex items-center gap-2 text-brand font-semibold">
+                      View <ArrowRight className="h-4 w-4" />
+                    </Link>
+                  </div>
                 </div>
               </div>
             )}

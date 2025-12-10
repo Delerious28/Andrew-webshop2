@@ -1,6 +1,6 @@
 import Link from 'next/link';
 import Image from 'next/image';
-import { ArrowUpRight, CircleDot, ShoppingCart, Star } from 'lucide-react';
+import { ArrowUpRight, CircleDot, ShoppingCart } from 'lucide-react';
 
 interface ProductCardProps {
   product: any;
@@ -19,7 +19,7 @@ export function ProductCard({ product, accent, showNewBadge, specLine }: Product
       href={`/products/${product.id}`}
       className={`group card-surface p-5 flex flex-col gap-4 transition duration-300 hover:-translate-y-1 hover:shadow-xl ${accent ? 'border-brand/40 shadow-xl' : ''}`}
     >
-      <div className="relative w-full aspect-[5/4] overflow-hidden rounded-2xl bg-gradient-to-br from-slate-50 to-slate-100 dark:from-slate-900 dark:to-slate-800">
+      <div className="relative w-full aspect-[4/3] overflow-hidden rounded-2xl bg-gradient-to-br from-slate-50 to-slate-100 dark:from-slate-900 dark:to-slate-800">
         {firstImage ? (
           <Image
             src={firstImage}
@@ -37,10 +37,12 @@ export function ProductCard({ product, accent, showNewBadge, specLine }: Product
       </div>
       <div className="flex-1 space-y-3">
         <div className="flex items-start justify-between gap-3">
-          <p className="font-semibold text-lg leading-tight text-slate-900 dark:text-white">{product.title}</p>
+          <div className="space-y-1">
+            <p className="font-semibold text-lg leading-tight text-slate-900 dark:text-white">{product.title}</p>
+            <p className="text-sm text-slate-600 dark:text-slate-200 line-clamp-1">{product.description}</p>
+          </div>
           <ArrowUpRight className="h-4 w-4 text-slate-400 group-hover:text-brand" />
         </div>
-        <p className="text-sm text-slate-600 dark:text-slate-200 line-clamp-1">{product.description}</p>
         {specLine && <p className="text-xs text-slate-500 dark:text-slate-400">{specLine}</p>}
         <div className="flex items-center justify-between text-sm text-slate-500 dark:text-slate-300">
           <div className="flex items-center gap-2">
@@ -50,10 +52,7 @@ export function ProductCard({ product, accent, showNewBadge, specLine }: Product
               {product.stock > 0 ? ` · ${product.stock} available` : ''}
             </span>
           </div>
-          <div className="flex items-center gap-1 text-amber-500">
-            <Star className="h-4 w-4 fill-amber-500/70" />
-            <span>4.8</span>
-          </div>
+          <span className="chip text-xs">{product.category}</span>
         </div>
         <div className="flex items-center justify-between pt-1">
           <p className="text-2xl font-bold text-slate-900 dark:text-white">${(product.price / 100).toFixed(2)}</p>

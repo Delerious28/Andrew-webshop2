@@ -5,10 +5,12 @@ import { useSession } from 'next-auth/react';
 import { Minus, Plus, Trash2 } from 'lucide-react';
 import { useCart } from '@/components/cart/CartProvider';
 import { PageShell } from '@/components/PageShell';
+import { useRouter } from 'next/navigation';
 
 export default function CartPage() {
   const { data: session, status } = useSession();
   const { items, ready, subtotal, updateQuantity, removeItem } = useCart();
+  const router = useRouter();
 
   if (status === 'loading' || !ready) {
     return (
@@ -157,18 +159,16 @@ export default function CartPage() {
               </div>
             </div>
             <button
-              className="w-full rounded-xl bg-brand px-5 py-3 text-white font-semibold shadow hover:-translate-y-0.5 transition"
-              onClick={async () => {
-                const res = await fetch('/api/checkout', { method: 'POST' });
-                if (res.ok) {
-                  const data = await res.json();
-                  if (data.url) window.location.href = data.url;
-                }
+              className="w-full rounded-xl bg-brand px-5 py-3 text-white font-semibold shadow hover:-translate-y-0.5 transition disabled:opacity-60"
+              disabled={items.length === 0}
+              onClick={() => {
+                if (items.length === 0) return;
+                router.push('/checkout');
               }}
             >
-              Checkout with Stripe
+              Continue
             </button>
-            <p className="text-xs text-slate-500 dark:text-slate-400">Secure Stripe checkout. Controls pause while redirecting.</p>
+            <p className="text-xs text-slate-500 dark:text-slate-400">Add your address next, then complete secure Stripe checkout.</p>
           </div>
         </div>
       </div>
