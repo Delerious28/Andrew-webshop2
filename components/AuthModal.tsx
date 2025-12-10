@@ -2,8 +2,9 @@
 
 import { useState } from 'react';
 import { signIn } from 'next-auth/react';
-import { X, Mail, Lock, Eye, EyeOff } from 'lucide-react';
+import { X, Mail, Lock, Eye, EyeOff, ShieldCheck } from 'lucide-react';
 import Link from 'next/link';
+import { LegalModal } from './LegalModal';
 
 interface AuthModalProps {
   isOpen: boolean;
@@ -20,11 +21,19 @@ export function AuthModal({ isOpen, onClose, initialMode = 'login' }: AuthModalP
   const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
+  const [legalOpen, setLegalOpen] = useState(false);
+  const [acceptedPolicies, setAcceptedPolicies] = useState(false);
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
     setError('');
     setLoading(true);
+
+    if (!acceptedPolicies) {
+      setError('Please review and accept the Terms of Service and Privacy Policy.');
+      setLoading(false);
+      return;
+    }
 
     const result = await signIn('credentials', {
       email,
@@ -35,8 +44,10 @@ export function AuthModal({ isOpen, onClose, initialMode = 'login' }: AuthModalP
     if (result?.error) {
       setError(result.error);
     } else {
+      const session = await fetch('/api/auth/session').then((res) => res.json());
+      const role = (session?.user as any)?.role;
       onClose();
-      window.location.href = '/profile';
+      window.location.href = role === 'ADMIN' ? '/admin' : '/profile';
     }
     setLoading(false);
   };
@@ -46,11 +57,17 @@ export function AuthModal({ isOpen, onClose, initialMode = 'login' }: AuthModalP
     setError('');
     setLoading(true);
 
+    if (!acceptedPolicies) {
+      setError('Please review and accept the Terms of Service and Privacy Policy.');
+      setLoading(false);
+      return;
+    }
+
     try {
       const res = await fetch('/api/auth/signup', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email, password, firstName, lastName, acceptTerms: true })
+        body: JSON.stringify({ email, password, firstName, lastName, acceptTerms: acceptedPolicies })
       });
 
       const data = await res.json();
@@ -64,7 +81,15 @@ export function AuthModal({ isOpen, onClose, initialMode = 'login' }: AuthModalP
         setEmail('');
         setFirstName('');
         setLastName('');
-        alert('Account created! Check your email to verify.');
+        const verificationLink = data.verificationToken
+          ? `${window.location.origin}/verify?token=${data.verificationToken}`
+          : null;
+        alert(
+          data.message ||
+            (verificationLink
+              ? `Account created. Use this link to verify: ${verificationLink}`
+              : 'Account created! Check your email to verify.')
+        );
       }
     } catch (err) {
       setError('An error occurred');
@@ -75,8 +100,9 @@ export function AuthModal({ isOpen, onClose, initialMode = 'login' }: AuthModalP
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm min-h-screen">
-      <div className="bg-white dark:bg-slate-900 rounded-2xl shadow-2xl w-full max-w-md mx-4 overflow-hidden">
+    <>
+      <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm min-h-screen">
+        <div className="bg-white dark:bg-slate-900 rounded-2xl shadow-2xl w-full max-w-md mx-4 overflow-hidden">
         {/* Header */}
         <div className="bg-gradient-to-r from-blue-600 to-blue-700 px-6 py-4 flex items-center justify-between">
           <h2 className="text-xl font-bold text-white">
@@ -182,10 +208,36 @@ export function AuthModal({ isOpen, onClose, initialMode = 'login' }: AuthModalP
               )}
             </div>
 
+            <div className="flex items-start gap-3 rounded-xl border border-slate-200 dark:border-slate-700 p-3 bg-slate-50 dark:bg-slate-900/40">
+              <input
+                id="accept-policies"
+                type="checkbox"
+                checked={acceptedPolicies}
+                onChange={(e) => setAcceptedPolicies(e.target.checked)}
+                className="mt-1 h-4 w-4 rounded border-slate-300 text-brand focus:ring-brand"
+                required
+              />
+              <div className="text-sm text-slate-600 dark:text-slate-300">
+                <label htmlFor="accept-policies" className="font-semibold text-slate-800 dark:text-slate-100 block">
+                  I agree to the Terms of Service and Privacy Policy
+                </label>
+                <p className="text-xs text-slate-500 dark:text-slate-400 flex items-center gap-2">
+                  <ShieldCheck className="h-4 w-4 text-brand" />
+                  <button
+                    type="button"
+                    onClick={() => setLegalOpen(true)}
+                    className="underline underline-offset-2 font-semibold"
+                  >
+                    Review policies and download copies
+                  </button>
+                </p>
+              </div>
+            </div>
+
             {/* Submit Button */}
             <button
               type="submit"
-              disabled={loading}
+              disabled={loading || !acceptedPolicies}
               className="w-full px-4 py-2.5 bg-blue-600 hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed text-white font-semibold rounded-lg transition"
             >
               {loading ? (
@@ -276,6 +328,16 @@ export function AuthModal({ isOpen, onClose, initialMode = 'login' }: AuthModalP
           </p>
         </div>
       </div>
-    </div>
+      </div>
+      <LegalModal
+        open={legalOpen}
+        onClose={() => setLegalOpen(false)}
+        initialTab="terms"
+        onAcknowledge={() => {
+          setAcceptedPolicies(true);
+          setLegalOpen(false);
+        }}
+      />
+    </>
   );
 }

@@ -2,34 +2,101 @@ import { prisma } from '@/lib/prisma';
 import { notFound } from 'next/navigation';
 import Script from 'next/script';
 import { ProductImageGallery } from '@/components/ProductImageGallery';
-import { AddToCartForm } from '@/components/AddToCartForm';
+import { ProductDetailTabs } from '@/components/ProductDetailTabs';
+import { PageShell } from '@/components/PageShell';
+import { AddToCartPanel } from '@/components/cart/AddToCartPanel';
 
 interface Props {
   params: { id: string };
 }
 
 export default async function ProductDetail({ params }: Props) {
-  const product = await prisma.product.findUnique({ where: { id: params.id }, include: { images: { orderBy: { order: 'asc' } } } });
+  const product = await prisma.product.findUnique({
+    where: { id: params.id },
+    include: { images: { orderBy: { order: 'asc' } } }
+  });
   if (!product) return notFound();
+  const brand = (product as any).brand || 'Remoof Works';
+  const heroImage = product.images[0]?.url;
 
   return (
-    <div className="grid lg:grid-cols-2 gap-10">
+    <PageShell as="section">
       <Script type="module" src="https://unpkg.com/@google/model-viewer/dist/model-viewer.min.js" />
-      <div className="space-y-4">
-        <ProductImageGallery images={product.images} title={product.title} />
-      </div>
-      <div className="space-y-6">
-        <div className="space-y-2">
-          <p className="text-brand text-sm font-semibold">{product.category}</p>
-          <h1 className="text-4xl font-bold">{product.title}</h1>
-          <p className="text-slate-600 dark:text-slate-300">{product.description}</p>
+      <div className="grid lg:grid-cols-[1.05fr,0.95fr] gap-10">
+        <div className="space-y-4">
+          <div className="card-surface p-4 md:p-6">
+            <ProductImageGallery images={product.images} title={product.title} />
+          </div>
         </div>
-        <div className="space-y-2">
-          <p className="text-3xl font-bold">${(product.price / 100).toFixed(2)}</p>
-          <p className="text-sm text-slate-500">{product.stock > 0 ? `${product.stock} in stock` : 'Out of stock'}</p>
+        <div className="space-y-7">
+          <div className="space-y-4">
+            <div className="flex flex-wrap gap-2">
+              <p className="chip bg-slate-100 text-slate-800 dark:bg-slate-900/50 dark:text-slate-200 border-slate-200/70">
+                {brand}
+              </p>
+              <p className="chip bg-brand/10 text-brand border-brand/40">{product.category || 'Components'}</p>
+            </div>
+            <h1 className="text-4xl font-extrabold leading-tight">{product.title}</h1>
+            <p className="text-3xl font-bold text-slate-900 dark:text-white">${(product.price / 100).toFixed(2)}</p>
+            <div className="flex flex-wrap items-center gap-3 text-sm text-slate-500 dark:text-slate-300">
+              <span
+                className={`chip ${
+                  product.stock > 0
+                    ? 'bg-emerald-100 text-emerald-700 dark:bg-emerald-900/40 dark:text-emerald-200 border-emerald-200/60'
+                    : 'bg-red-100 text-red-700 dark:bg-red-900/40 dark:text-red-200 border-red-200/60'
+                }`}
+              >
+                {product.stock > 0 ? `In stock · ${product.stock} available` : 'Out of stock'}
+              </span>
+              <span className="chip">Ships in 1–2 business days</span>
+              <span className="chip">Free shipping over $99</span>
+            </div>
+            <p className="text-base text-slate-600 dark:text-slate-200 leading-relaxed">{product.description}</p>
+            <ul className="space-y-2 text-sm text-slate-600 dark:text-slate-200">
+              {['Carbon-grade hardware', 'Precision machining', 'Tested for endurance'].map((spec) => (
+                <li key={spec} className="flex items-start gap-2">
+                  <span className="mt-1 h-2 w-2 rounded-full bg-brand" />
+                  <span>{spec}</span>
+                </li>
+              ))}
+            </ul>
+          </div>
+          <AddToCartPanel
+            product={{
+              id: product.id,
+              title: product.title,
+              price: product.price,
+              heroImage,
+              category: product.category
+            }}
+          />
+          <ProductDetailTabs
+            sections={[
+              {
+                id: 'specs',
+                label: 'Specifications',
+                content: (
+                  <ul className="list-disc pl-5 space-y-1 text-sm text-slate-600 dark:text-slate-300">
+                    <li>Carbon-grade hardware with endurance testing</li>
+                    <li>Lightweight build tuned for long rides</li>
+                    <li>Compatible with major drivetrain standards</li>
+                  </ul>
+                )
+              },
+              {
+                id: 'related',
+                label: 'You may also like',
+                content: <p className="text-sm text-slate-600 dark:text-slate-300">Cross-sell suggestions coming soon.</p>
+              },
+              {
+                id: 'reviews',
+                label: 'Reviews',
+                content: <p className="text-sm text-slate-600 dark:text-slate-300">Be the first to review this component.</p>
+              }
+            ]}
+          />
         </div>
-        <AddToCartForm productId={product.id} />
       </div>
-    </div>
+    </PageShell>
   );
 }

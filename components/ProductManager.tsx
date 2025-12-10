@@ -240,20 +240,32 @@ export function ProductManager({ products }: ProductManagerProps) {
                   initial={{ opacity: 0, y: 16 }}
                   animate={{ opacity: 1, y: 0 }}
                   exit={{ opacity: 0, y: -16 }}
-                  className={`w-full text-left rounded-2xl border p-4 transition shadow-sm ${
+                  className={`w-full text-left rounded-2xl border p-4 transition shadow-sm flex gap-3 ${
                     activeProduct?.id === product.id
-                      ? 'border-brand/50 bg-brand/5 dark:bg-brand/10'
+                      ? 'border-brand/50 ring-2 ring-brand/20 bg-white/80 dark:bg-slate-900'
                       : 'border-slate-200 dark:border-slate-800 bg-white/60 dark:bg-slate-900/60 hover:bg-white dark:hover:bg-slate-900'
                   }`}
                 >
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <p className="font-semibold text-slate-900 dark:text-white">{product.title}</p>
-                      <p className="text-sm text-slate-500 dark:text-slate-400">${(product.price / 100).toFixed(2)} · {product.stock} in stock</p>
-                    </div>
-                    <span className="text-xs rounded-full border border-slate-200 dark:border-slate-700 px-2 py-1 text-slate-600 dark:text-slate-300 font-semibold">{product.category}</span>
+                  <div className="relative w-14 h-14 rounded-xl overflow-hidden border border-slate-200 dark:border-slate-800 bg-slate-100 dark:bg-slate-800 flex-shrink-0">
+                    {product.images?.[0]?.url && (
+                      <img src={product.images[0].url} alt={product.title} className="w-full h-full object-cover" />
+                    )}
                   </div>
-                  <p className="text-xs text-slate-500 dark:text-slate-400 line-clamp-2 mt-2">{product.description}</p>
+                  <div className="flex-1 space-y-1">
+                    <div className="flex items-start justify-between gap-3">
+                      <div>
+                        <p className="font-semibold text-slate-900 dark:text-white">{product.title}</p>
+                        <p className="text-xs text-slate-500 dark:text-slate-400">{product.description}</p>
+                      </div>
+                      <span className="text-xs rounded-full border border-slate-200 dark:border-slate-700 px-2 py-1 text-slate-600 dark:text-slate-300 font-semibold">
+                        {product.category}
+                      </span>
+                    </div>
+                    <div className="flex items-center justify-between text-sm text-slate-600 dark:text-slate-300">
+                      <span>${(product.price / 100).toFixed(2)}</span>
+                      <span>{product.stock} in stock</span>
+                    </div>
+                  </div>
                 </motion.button>
               ))}
             </AnimatePresence>

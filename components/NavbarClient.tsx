@@ -17,8 +17,8 @@ interface NavbarClientProps {
 export function NavbarClient({ session, role }: NavbarClientProps) {
   const [isAuthModalOpen, setIsAuthModalOpen] = useState(false);
   const [isProfileMenuOpen, setIsProfileMenuOpen] = useState(false);
-  const { items } = useCart();
-  const cartCount = items.reduce((sum, item) => sum + item.quantity, 0);
+  const { totalQuantity } = useCart();
+  const isAdmin = role === 'ADMIN';
 
   return (
     <>
@@ -29,9 +29,9 @@ export function NavbarClient({ session, role }: NavbarClientProps) {
           className="relative rounded-full border border-slate-200 dark:border-slate-800 p-2 hover:bg-slate-100 dark:hover:bg-slate-900"
         >
           <ShoppingBag className="h-5 w-5" />
-          {cartCount > 0 && (
-            <span className="absolute -right-1 -top-1 h-5 min-w-[20px] rounded-full bg-brand text-[11px] font-semibold text-white grid place-items-center px-1">
-              {cartCount}
+          {totalQuantity > 0 && (
+            <span className="absolute -right-1 -top-1 inline-flex min-w-[1.1rem] items-center justify-center rounded-full bg-brand text-[11px] font-semibold text-white shadow-lg px-1">
+              {totalQuantity > 9 ? '9+' : totalQuantity}
             </span>
           )}
         </Link>
@@ -49,18 +49,18 @@ export function NavbarClient({ session, role }: NavbarClientProps) {
               onClick={() => setIsProfileMenuOpen(!isProfileMenuOpen)}
               className="text-sm font-medium px-4 py-2 rounded-lg bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 transition flex items-center gap-2"
             >
-              <User className="h-4 w-4" />
-              <span className="hidden sm:inline">{session.user?.name}</span>
+              {isAdmin ? <ShieldCheck className="h-4 w-4" /> : <User className="h-4 w-4" />}
+              <span className="hidden sm:inline">{isAdmin ? 'Admin' : session.user?.name}</span>
             </button>
 
             {isProfileMenuOpen && (
               <div className="absolute right-0 mt-2 w-48 bg-white dark:bg-slate-900 rounded-lg shadow-xl border border-slate-200 dark:border-slate-700 overflow-hidden z-50">
                 <Link
-                  href="/profile"
+                  href={isAdmin ? '/admin' : '/profile'}
                   className="block px-4 py-3 text-sm text-slate-700 dark:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800 transition flex items-center gap-2"
                   onClick={() => setIsProfileMenuOpen(false)}
                 >
-                  <User className="h-4 w-4" /> My Profile
+                  {isAdmin ? <ShieldCheck className="h-4 w-4" /> : <User className="h-4 w-4" />} {isAdmin ? 'Admin dashboard' : 'My Profile'}
                 </Link>
                 <hr className="border-slate-200 dark:border-slate-700" />
                 <button

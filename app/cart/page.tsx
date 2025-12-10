@@ -1,244 +1,177 @@
 'use client';
 import Link from 'next/link';
 import Image from 'next/image';
-import { useEffect, useState } from 'react';
 import { useSession } from 'next-auth/react';
-import { Trash2, Plus, Minus } from 'lucide-react';
-
-interface CartItem {
-  id: string;
-  quantity: number;
-  product: {
-    id: string;
-    title: string;
-    price: number;
-    images: { url: string; type: string }[];
-  };
-}
+import { Minus, Plus, Trash2 } from 'lucide-react';
+import { useCart } from '@/components/cart/CartProvider';
+import { PageShell } from '@/components/PageShell';
 
 export default function CartPage() {
-  const { data: session } = useSession();
-  const [cartItems, setCartItems] = useState<CartItem[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [checkoutLoading, setCheckoutLoading] = useState(false);
+  const { data: session, status } = useSession();
+  const { items, ready, subtotal, updateQuantity, removeItem } = useCart();
 
-  useEffect(() => {
-    if (session?.user) {
-      fetchCart();
-    }
-  }, [session]);
-
-  const fetchCart = async () => {
-    try {
-      const res = await fetch('/api/cart');
-      if (res.ok) {
-        const items = await res.json();
-        setCartItems(items);
-      }
-    } catch (error) {
-      console.error('Failed to fetch cart:', error);
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const removeFromCart = async (productId: string) => {
-    try {
-      const res = await fetch('/api/cart', {
-        method: 'DELETE',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ productId })
-      });
-      if (res.ok) {
-        setCartItems(prev => prev.filter(item => item.product.id !== productId));
-      }
-    } catch (error) {
-      console.error('Failed to remove item:', error);
-    }
-  };
-
-  const updateQuantity = async (productId: string, newQuantity: number) => {
-    if (newQuantity <= 0) {
-      await removeFromCart(productId);
-      return;
-    }
-    
-    try {
-      const currentItem = cartItems.find(item => item.product.id === productId);
-      if (!currentItem) return;
-
-      const quantityDiff = newQuantity - currentItem.quantity;
-      
-      const res = await fetch('/api/cart', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ productId, quantity: quantityDiff })
-      });
-
-      if (res.ok) {
-        setCartItems(prev =>
-          prev.map(item =>
-            item.product.id === productId
-              ? { ...item, quantity: newQuantity }
-              : item
-          )
-        );
-      }
-    } catch (error) {
-      console.error('Failed to update quantity:', error);
-    }
-  };
-
-  const handleCheckout = async () => {
-    setCheckoutLoading(true);
-    try {
-      const res = await fetch('/api/checkout', {
-        method: 'POST'
-      });
-
-      if (res.ok) {
-        const data = await res.json();
-        if (data.url) {
-          window.location.href = data.url;
-        }
-      } else {
-        alert('Failed to start checkout');
-      }
-    } catch (error) {
-      console.error('Checkout error:', error);
-      alert('Error during checkout');
-    } finally {
-      setCheckoutLoading(false);
-    }
-  };
+  if (status === 'loading' || !ready) {
+    return (
+      <PageShell>
+        <p className="text-slate-600 dark:text-slate-300">Loading cart...</p>
+      </PageShell>
+    );
+  }
 
   if (!session) {
     return (
-      <main className="mx-auto max-w-4xl px-4 py-16 space-y-6">
-        <div className="space-y-2">
-          <h1 className="text-3xl font-semibold">Your Cart</h1>
-          <p className="text-slate-600 dark:text-slate-300">Please sign in to view your cart.</p>
+      <PageShell>
+        <div className="space-y-4 max-w-2xl">
+          <h1 className="text-4xl font-bold">Your Cart</h1>
+          <p className="text-slate-600 dark:text-slate-300">Please sign in to view and manage your cart.</p>
+          <Link
+            href="/signin"
+            className="inline-flex items-center gap-2 rounded-xl bg-brand px-5 py-3 text-white font-semibold shadow hover:-translate-y-0.5 transition"
+          >
+            Sign in
+          </Link>
         </div>
-        <Link href="/signin" className="inline-flex items-center gap-2 rounded-lg bg-brand px-4 py-2 text-white shadow hover:opacity-90">
-          Sign In
-        </Link>
-      </main>
+      </PageShell>
     );
   }
 
-  if (loading) {
+  if (items.length === 0) {
     return (
-      <main className="mx-auto max-w-4xl px-4 py-16">
-        <p className="text-slate-600 dark:text-slate-300">Loading cart...</p>
-      </main>
-    );
-  }
-
-  if (cartItems.length === 0) {
-    return (
-      <main className="mx-auto max-w-4xl px-4 py-16 space-y-6">
-        <div className="space-y-2">
-          <h1 className="text-3xl font-semibold">Your Cart</h1>
+      <PageShell>
+        <div className="space-y-4 max-w-3xl">
+          <h1 className="text-4xl font-bold">Your Cart</h1>
           <p className="text-slate-600 dark:text-slate-300">Your cart is empty.</p>
+          <div className="card-surface p-10 text-center space-y-4">
+            <div className="mx-auto h-20 w-20 rounded-full bg-brand/10 flex items-center justify-center text-brand text-3xl">🛒</div>
+            <p className="text-lg font-semibold">No items yet</p>
+            <p className="text-slate-600 dark:text-slate-300">Browse the catalogue and add components to see them here.</p>
+            <Link
+              href="/products"
+              className="inline-flex items-center gap-2 rounded-xl bg-brand px-5 py-3 text-white font-semibold shadow hover:-translate-y-0.5 transition"
+            >
+              Continue shopping
+            </Link>
+          </div>
         </div>
-        <Link
-          href="/products"
-          className="inline-flex items-center gap-2 rounded-lg bg-brand px-4 py-2 text-white shadow hover:opacity-90"
-        >
-          Continue shopping
-        </Link>
-      </main>
+      </PageShell>
     );
   }
 
-  const total = cartItems.reduce((sum, item) => sum + (item.product.price * item.quantity), 0);
+  const estimatedTax = subtotal * 0.07;
+  const total = subtotal + estimatedTax;
 
   return (
-    <main className="mx-auto max-w-4xl px-4 py-16 space-y-6">
-      <div className="space-y-2">
-        <h1 className="text-3xl font-semibold">Your Cart</h1>
-        <p className="text-slate-600 dark:text-slate-300">{cartItems.length} item(s)</p>
-      </div>
-
+    <PageShell>
       <div className="space-y-4">
-        {cartItems.map((item) => (
-          <div key={item.id} className="flex gap-4 border border-slate-200 dark:border-slate-800 rounded-lg p-4">
-            <div className="relative w-24 h-24 overflow-hidden rounded-lg bg-slate-200 dark:bg-slate-800 flex-shrink-0">
-              {item.product.images?.[0] ? (
-                <Image
-                  src={item.product.images[0].url}
-                  alt={item.product.title}
-                  fill
-                  className="object-contain"
-                />
-              ) : (
-                <div className="w-full h-full flex items-center justify-center text-slate-500">No image</div>
-              )}
-            </div>
-
-            <div className="flex-1 flex flex-col justify-between">
-              <div>
-                <h3 className="font-semibold text-lg">{item.product.title}</h3>
-                <p className="text-sm text-slate-600 dark:text-slate-300">
-                  ${(item.product.price / 100).toFixed(2)} each
-                </p>
-              </div>
-
-              <div className="flex items-center gap-4">
-                <div className="flex items-center gap-2">
-                  <button
-                    onClick={() => updateQuantity(item.product.id, item.quantity - 1)}
-                    className="p-1 rounded hover:bg-slate-200 dark:hover:bg-slate-800"
-                  >
-                    <Minus className="h-4 w-4" />
-                  </button>
-                  <span className="w-8 text-center">{item.quantity}</span>
-                  <button
-                    onClick={() => updateQuantity(item.product.id, item.quantity + 1)}
-                    className="p-1 rounded hover:bg-slate-200 dark:hover:bg-slate-800"
-                  >
-                    <Plus className="h-4 w-4" />
-                  </button>
-                </div>
-
-                <p className="font-semibold text-lg">
-                  ${((item.product.price * item.quantity) / 100).toFixed(2)}
-                </p>
-
-                <button
-                  onClick={() => removeFromCart(item.product.id)}
-                  className="ml-auto p-2 rounded hover:bg-red-100 dark:hover:bg-red-900/30 text-red-600"
-                >
-                  <Trash2 className="h-5 w-5" />
-                </button>
-              </div>
-            </div>
-          </div>
-        ))}
-      </div>
-
-      <div className="border-t border-slate-200 dark:border-slate-800 pt-6 space-y-4">
-        <div className="flex justify-between items-center text-lg font-semibold">
-          <span>Total:</span>
-          <span>${(total / 100).toFixed(2)}</span>
+        <div className="space-y-2">
+          <h1 className="text-4xl font-bold">Your Cart</h1>
+          <p className="text-slate-600 dark:text-slate-300">{items.length} item(s)</p>
         </div>
 
-        <button
-          onClick={handleCheckout}
-          disabled={checkoutLoading}
-          className="w-full bg-brand text-white py-3 rounded-lg font-semibold hover:opacity-90 disabled:opacity-50"
-        >
-          {checkoutLoading ? 'Redirecting to Stripe...' : 'Checkout with Stripe'}
-        </button>
+        <div className="grid gap-8 lg:grid-cols-[1.7fr,1fr]">
+          <div className="space-y-4">
+            {items.map((item) => (
+              <div key={item.productId} className="card-surface p-5 flex flex-col gap-4">
+                <div className="flex gap-4">
+                  <div className="relative w-28 h-28 overflow-hidden rounded-xl bg-slate-200 dark:bg-slate-800 flex-shrink-0">
+                    {item.image ? (
+                      <Image src={item.image} alt={item.title} fill className="object-contain" />
+                    ) : (
+                      <div className="w-full h-full flex items-center justify-center text-slate-500">No image</div>
+                    )}
+                  </div>
+                  <div className="flex-1 space-y-2">
+                    <div className="flex items-start justify-between gap-3">
+                      <div className="space-y-1">
+                        <h3 className="font-semibold text-lg">{item.title}</h3>
+                        <p className="text-sm text-slate-600 dark:text-slate-300">
+                          ${(item.price / 100).toFixed(2)} each
+                        </p>
+                      </div>
+                      <button
+                        onClick={() => removeItem(item.productId)}
+                        className="p-2 rounded-lg hover:bg-red-100 dark:hover:bg-red-900/30 text-red-600"
+                        aria-label={`Remove ${item.title}`}
+                      >
+                        <Trash2 className="h-5 w-5" />
+                      </button>
+                    </div>
+                    <div className="flex flex-wrap items-center gap-4">
+                      <div className="flex items-center gap-2 rounded-xl border border-slate-200 dark:border-slate-800 px-2 py-1">
+                        <button
+                          onClick={() => updateQuantity(item.productId, Math.max(1, item.quantity - 1))}
+                          className="p-2 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-700"
+                          aria-label={`Decrease ${item.title}`}
+                        >
+                          <Minus className="h-4 w-4" />
+                        </button>
+                        <input
+                          type="number"
+                          min={1}
+                          value={item.quantity}
+                          onChange={(e) => updateQuantity(item.productId, Math.max(1, parseInt(e.target.value) || 1))}
+                          className="w-16 rounded-lg border border-transparent bg-transparent text-center font-semibold focus:ring-0 focus:border-slate-400"
+                          aria-label={`Quantity for ${item.title}`}
+                        />
+                        <button
+                          onClick={() => updateQuantity(item.productId, item.quantity + 1)}
+                          className="p-2 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-700"
+                          aria-label={`Increase ${item.title}`}
+                        >
+                          <Plus className="h-4 w-4" />
+                        </button>
+                      </div>
+                      <div className="ml-auto text-right space-y-1">
+                        <p className="text-sm text-slate-500 dark:text-slate-300">Line subtotal</p>
+                        <p className="text-lg font-semibold">${((item.price * item.quantity) / 100).toFixed(2)}</p>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
 
-        <Link
-          href="/products"
-          className="block text-center text-brand hover:underline"
-        >
-          Continue shopping
-        </Link>
+          <div className="card-surface p-6 space-y-4 h-fit sticky top-8">
+            <div className="space-y-1">
+              <h2 className="text-xl font-semibold">Order Summary</h2>
+              <p className="text-sm text-slate-600 dark:text-slate-300">Review your cart before checkout.</p>
+            </div>
+            <div className="space-y-2 text-sm">
+              <div className="flex justify-between">
+                <span>Subtotal</span>
+                <span className="font-semibold">${(subtotal / 100).toFixed(2)}</span>
+              </div>
+              <div className="flex justify-between text-slate-500 dark:text-slate-400">
+                <span>Taxes</span>
+                <span>${(estimatedTax / 100).toFixed(2)}</span>
+              </div>
+              <div className="flex justify-between text-slate-500 dark:text-slate-400">
+                <span>Shipping</span>
+                <span>Calculated at checkout</span>
+              </div>
+              <hr className="border-slate-200 dark:border-slate-800" />
+              <div className="flex justify-between text-lg font-bold">
+                <span>Total</span>
+                <span>${(total / 100).toFixed(2)}</span>
+              </div>
+            </div>
+            <button
+              className="w-full rounded-xl bg-brand px-5 py-3 text-white font-semibold shadow hover:-translate-y-0.5 transition"
+              onClick={async () => {
+                const res = await fetch('/api/checkout', { method: 'POST' });
+                if (res.ok) {
+                  const data = await res.json();
+                  if (data.url) window.location.href = data.url;
+                }
+              }}
+            >
+              Checkout with Stripe
+            </button>
+            <p className="text-xs text-slate-500 dark:text-slate-400">Secure Stripe checkout. Controls pause while redirecting.</p>
+          </div>
+        </div>
       </div>
-    </main>
+    </PageShell>
   );
 }
-

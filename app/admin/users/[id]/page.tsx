@@ -48,6 +48,7 @@ export default function UserDetailPage() {
   const [loading, setLoading] = useState(true);
   const [editing, setEditing] = useState(false);
   const [deleting, setDeleting] = useState(false);
+  const [verifying, setVerifying] = useState(false);
   
   // Edit form state
   const [editFirstName, setEditFirstName] = useState('');
@@ -144,6 +145,27 @@ export default function UserDetailPage() {
       notify({ title: 'Delete failed', message: 'Network error. Try again.', tone: 'warning' });
     } finally {
       setDeleting(false);
+    }
+  };
+
+  const handleBypassVerification = async () => {
+    if (!user) return;
+    setVerifying(true);
+    try {
+      const res = await fetch(`/api/admin/users/${user.id}`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ forceVerify: true })
+      });
+      const data = await res.json();
+      if (res.ok && data.user) {
+        setUser({ ...user, emailVerified: data.user.emailVerified, verificationToken: null });
+        notify({ title: 'Verification updated', message: 'User marked as verified.', tone: 'success' });
+      }
+    } catch (error) {
+      notify({ title: 'Failed to update verification', message: 'Please try again.', tone: 'warning' });
+    } finally {
+      setVerifying(false);
     }
   };
 
@@ -306,6 +328,16 @@ export default function UserDetailPage() {
                     <Edit2 className="h-4 w-4" />
                     Edit User
                   </button>
+                  {!user.emailVerified && (
+                    <button
+                      onClick={handleBypassVerification}
+                      disabled={verifying}
+                      className="flex items-center gap-2 px-4 py-2 bg-emerald-600 text-white rounded-lg hover:bg-emerald-700 transition disabled:opacity-60"
+                    >
+                      <Shield className="h-4 w-4" />
+                      {verifying ? 'Marking verified...' : 'Skip email check'}
+                    </button>
+                  )}
                   <button
                     onClick={handleDelete}
                     disabled={deleting}
