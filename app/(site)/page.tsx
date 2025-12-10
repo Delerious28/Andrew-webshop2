@@ -34,12 +34,12 @@ export default function HomePage() {
       <AuthModal isOpen={showAuthModal} onClose={() => setShowAuthModal(false)} initialMode="signup" />
       <PageShell>
         <div className="space-y-16">
-        <section className="grid md:grid-cols-2 gap-10 items-center">
+        <section className="grid md:grid-cols-2 gap-10 items-start">
           <motion.div
             initial={{ opacity: 0, y: 30 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.5 }}
-            className="flex flex-col space-y-6 max-w-xl"
+            className="flex flex-col space-y-6 max-w-xl h-fit"
           >
             <div className="chip border-brand/40 text-brand bg-brand/10">
               <Sparkles className="h-4 w-4" /> Remoof · Modern cycling hardware
