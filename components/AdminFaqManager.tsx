@@ -255,6 +255,7 @@ export function AdminFaqManager() {
           )}
         </div>
 
+        <div className="card-surface p-5 rounded-2xl border border-slate-200 dark:border-slate-800 space-y-4">
           <div className="space-y-3">
             <label className="space-y-1 text-sm font-medium text-slate-700 dark:text-slate-200 block">
               Title
