@@ -196,97 +196,64 @@ export function AdminFaqManager() {
         </div>
         <button
           onClick={() => setActive()}
-          className="inline-flex items-center gap-2 rounded-xl bg-brand/10 px-4 py-2 text-brand font-semibold hover:bg-brand/20"
+          className="inline-flex items-center gap-2 rounded-xl bg-brand px-4 py-2 text-white font-semibold shadow hover:-translate-y-0.5 transition"
         >
           <Plus className="h-4 w-4" /> New FAQ
         </button>
       </div>
 
-      <div className="grid lg:grid-cols-[1.1fr,1.3fr] gap-5">
-        <div className="space-y-3">
-          {entries.map((entry) => (
-            <div
-              key={entry.id}
-              className={`card-surface p-4 rounded-2xl border transition ${
-                selectedId === entry.id ? 'border-brand/50 ring-2 ring-brand/30' : 'border-slate-200 dark:border-slate-800'
-              }`}
-            >
-              <div className="flex items-start justify-between gap-3">
-                <div className="flex-1 space-y-2">
-                  <p className="font-semibold text-slate-900 dark:text-white">{entry.title}</p>
-                  <div className="space-y-2">
-                    {entry.blocks.map((block, idx) => (
-                      <div key={idx} className="text-xs">
-                        {block.type === 'image' && block.imageUrl && (
-                          <img src={block.imageUrl} alt={block.alt || ''} className="max-w-full h-16 object-cover rounded border border-slate-200 dark:border-slate-700" />
-                        )}
-                        {block.type === 'text' && idx < 2 && (
-                          <p className="text-slate-600 dark:text-slate-400 line-clamp-2">{block.content}</p>
-                        )}
-                        {block.type === 'link' && idx < 2 && (
-                          <p className="text-brand">{block.label || block.url}</p>
-                        )}
-                      </div>
-                    ))}
-                  </div>
-                </div>
-                <div className="flex items-center gap-2">
-                  <button onClick={() => reorder(entry.id!, -1)} className="p-2 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-800" aria-label="Move up">
-                    <ArrowUp className="h-4 w-4" />
-                  </button>
-                  <button onClick={() => reorder(entry.id!, 1)} className="p-2 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-800" aria-label="Move down">
-                    <ArrowDown className="h-4 w-4" />
-                  </button>
-                  <button
-                    onClick={() => toggleVisibility(entry)}
-                    className="p-2 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-800"
-                    aria-label="Toggle visibility"
-                  >
-                    {entry.isVisible ? <Eye className="h-4 w-4 text-emerald-500" /> : <EyeOff className="h-4 w-4 text-slate-400" />}
-                  </button>
-                  <button
-                    onClick={() => setActive(entry)}
-                    className="px-3 py-2 rounded-lg bg-brand/10 text-brand font-semibold hover:bg-brand/20"
-                  >
-                    Edit
-                  </button>
-                  <button
-                    onClick={() => deleteEntry(entry.id)}
-                    className="p-2 rounded-lg hover:bg-red-100 dark:hover:bg-red-900/30 text-red-600"
-                    aria-label="Delete"
-                  >
-                    <Trash2 className="h-4 w-4" />
-                  </button>
-                </div>
-              </div>
-            </div>
-          ))}
-        </div>
-
-        <div className="card-surface p-5 rounded-2xl border border-slate-200 dark:border-slate-800 space-y-4">
-          <div className="flex items-center justify-between">
-            <div>
-              <h3 className="text-xl font-semibold">{selectedEntry.id ? 'Edit FAQ' : 'Create FAQ'}</h3>
-              <p className="text-sm text-slate-500 dark:text-slate-400">Build the blocks that appear on the public FAQ page.</p>
-            </div>
-            <label className="flex items-center gap-2 text-sm">
-              <input
-                type="checkbox"
-                checked={selectedEntry.isVisible}
-                onChange={(e) =>
-                  setEntries((prev) =>
-                    prev.map((item) =>
-                      item.id === selectedEntry.id
-                        ? { ...item, isVisible: e.target.checked }
-                        : item
-                    )
-                  )
-                }
-                className="accent-brand"
-              />
-              Visible
+      <div className="card-surface p-5 rounded-2xl border border-slate-200 dark:border-slate-800 space-y-4">
+        <div className="flex items-center justify-between gap-4">
+          <div className="flex-1">
+            <label className="space-y-2 text-sm font-medium text-slate-700 dark:text-slate-200 block">
+              Select FAQ to edit
+              <select
+                value={selectedId || 'new'}
+                onChange={(e) => {
+                  const val = e.target.value;
+                  if (val === 'new') {
+                    setActive();
+                  } else {
+                    const entry = entries.find((item) => item.id === val);
+                    if (entry) setActive(entry);
+                  }
+                }}
+                className="w-full rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 px-3 py-2"
+              >
+                <option value="new">➕ Create new FAQ</option>
+                {entries.map((entry) => (
+                  <option key={entry.id} value={entry.id}>
+                    {entry.title || 'Untitled FAQ'}
+                  </option>
+                ))}
+              </select>
             </label>
           </div>
+          {selectedEntry.id && (
+            <div className="flex items-center gap-2 pt-6">
+              <button onClick={() => reorder(selectedEntry.id!, -1)} className="p-2 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-800" aria-label="Move up">
+                <ArrowUp className="h-4 w-4" />
+              </button>
+              <button onClick={() => reorder(selectedEntry.id!, 1)} className="p-2 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-800" aria-label="Move down">
+                <ArrowDown className="h-4 w-4" />
+              </button>
+              <button
+                onClick={() => toggleVisibility(selectedEntry)}
+                className="p-2 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-800"
+                aria-label="Toggle visibility"
+              >
+                {selectedEntry.isVisible ? <Eye className="h-4 w-4 text-emerald-500" /> : <EyeOff className="h-4 w-4 text-slate-400" />}
+              </button>
+              <button
+                onClick={() => deleteEntry(selectedEntry.id)}
+                className="p-2 rounded-lg hover:bg-red-100 dark:hover:bg-red-900/30 text-red-600"
+                aria-label="Delete"
+              >
+                <Trash2 className="h-4 w-4" />
+              </button>
+            </div>
+          )}
+        </div>
 
           <div className="space-y-3">
             <label className="space-y-1 text-sm font-medium text-slate-700 dark:text-slate-200 block">
@@ -423,11 +390,11 @@ export function AdminFaqManager() {
           </div>
 
           <div className="rounded-2xl border border-slate-200 dark:border-slate-800 p-4 space-y-2 bg-slate-50/70 dark:bg-slate-900/60">
-            <p className="text-sm font-semibold">Live preview</p>
+            <p className="text-sm font-semibold">Preview</p>
             <div className="space-y-3">
               <p className="text-lg font-bold">{selectedEntry.title || 'FAQ title'}</p>
               {selectedEntry.blocks.map((block, idx) => (
-                <div key={idx} className="rounded-xl bg-slate-900/40 px-4 py-3 border border-slate-800">
+                <div key={idx}>
                   {renderBlockPreview(block, idx)}
                 </div>
               ))}
