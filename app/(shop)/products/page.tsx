@@ -1,12 +1,14 @@
-import { prisma } from '@/lib/prisma';
+'use client';
+
 import { motion } from 'framer-motion';
 import { ProductsExplorer } from '@/components/ProductsExplorer';
+import { useEffect, useState } from 'react';
 
-export default async function ProductsPage() {
-  const products = await prisma.product.findMany({ 
-    orderBy: { createdAt: 'desc' },
-    include: { images: true }
-  });
+interface ProductsPageProps {
+  products: any[];
+}
+
+function ProductsPageContent({ products }: ProductsPageProps) {
   return (
     <div className="space-y-8">
       <motion.div
@@ -23,4 +25,14 @@ export default async function ProductsPage() {
       </motion.div>
     </div>
   );
+}
+
+import { prisma } from '@/lib/prisma';
+
+export default async function ProductsPage() {
+  const products = await prisma.product.findMany({ 
+    orderBy: { createdAt: 'desc' },
+    include: { images: true }
+  });
+  return <ProductsPageContent products={products} />;
 }
