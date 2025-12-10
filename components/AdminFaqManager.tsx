@@ -402,7 +402,7 @@ export function AdminFaqManager() {
                       title: e.target.value
                     }))
                   }
-                  className="w-full rounded-lg border border-slate-200 dark:border-slate-700 bg-transparent px-3 py-2"
+                  className="w-full rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 text-slate-900 dark:text-slate-100 px-3 py-2"
                   placeholder="Shipping speeds"
                 />
               </label>
@@ -441,7 +441,7 @@ export function AdminFaqManager() {
                       <textarea
                         value={block.content}
                         onChange={(e) => updateBlock(idx, { content: e.target.value })}
-                        className="w-full rounded-lg border border-slate-200 dark:border-slate-700 bg-transparent px-3 py-2"
+                        className="w-full rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 text-slate-900 dark:text-slate-100 px-3 py-2"
                         rows={2}
                         placeholder="Answer text"
                       />
@@ -452,13 +452,13 @@ export function AdminFaqManager() {
                         <input
                           value={block.imageUrl}
                           onChange={(e) => updateBlock(idx, { imageUrl: e.target.value })}
-                          className="rounded-lg border border-slate-200 dark:border-slate-700 bg-transparent px-3 py-2"
+                          className="rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 text-slate-900 dark:text-slate-100 px-3 py-2"
                           placeholder="Image URL"
                         />
                         <input
                           value={block.alt}
                           onChange={(e) => updateBlock(idx, { alt: e.target.value })}
-                          className="rounded-lg border border-slate-200 dark:border-slate-700 bg-transparent px-3 py-2"
+                          className="rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 text-slate-900 dark:text-slate-100 px-3 py-2"
                           placeholder="Alt text"
                         />
                       </div>
@@ -469,13 +469,13 @@ export function AdminFaqManager() {
                         <input
                           value={block.label}
                           onChange={(e) => updateBlock(idx, { label: e.target.value })}
-                          className="rounded-lg border border-slate-200 dark:border-slate-700 bg-transparent px-3 py-2"
+                          className="rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 text-slate-900 dark:text-slate-100 px-3 py-2"
                           placeholder="Link label"
                         />
                         <input
                           value={block.url}
                           onChange={(e) => updateBlock(idx, { url: e.target.value })}
-                          className="rounded-lg border border-slate-200 dark:border-slate-700 bg-transparent px-3 py-2"
+                          className="rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 text-slate-900 dark:text-slate-100 px-3 py-2"
                           placeholder="https://..."
                         />
                       </div>
@@ -487,7 +487,7 @@ export function AdminFaqManager() {
                         <select
                           value={block.variant || 'default'}
                           onChange={(e) => updateBlock(idx, { variant: e.target.value as FaqBlock['variant'] })}
-                          className="w-full rounded-lg border border-slate-200 dark:border-slate-700 bg-transparent px-2 py-1"
+                          className="w-full rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 text-slate-900 dark:text-slate-100 px-2 py-1"
                         >
                           <option value="default">Default</option>
                           <option value="muted">Muted</option>
@@ -499,7 +499,7 @@ export function AdminFaqManager() {
                         <select
                           value={block.align || 'left'}
                           onChange={(e) => updateBlock(idx, { align: e.target.value as FaqBlock['align'] })}
-                          className="w-full rounded-lg border border-slate-200 dark:border-slate-700 bg-transparent px-2 py-1"
+                          className="w-full rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 text-slate-900 dark:text-slate-100 px-2 py-1"
                         >
                           <option value="left">Left</option>
                           <option value="center">Center</option>
@@ -510,7 +510,7 @@ export function AdminFaqManager() {
                         <select
                           value={block.emphasis || 'normal'}
                           onChange={(e) => updateBlock(idx, { emphasis: e.target.value as FaqBlock['emphasis'] })}
-                          className="w-full rounded-lg border border-slate-200 dark:border-slate-700 bg-transparent px-2 py-1"
+                          className="w-full rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 text-slate-900 dark:text-slate-100 px-2 py-1"
                         >
                           <option value="normal">Normal</option>
                           <option value="semibold">Bold</option>
@@ -525,7 +525,7 @@ export function AdminFaqManager() {
                           <select
                             value={block.linkStyle || 'link'}
                             onChange={(e) => updateBlock(idx, { linkStyle: e.target.value as FaqBlock['linkStyle'] })}
-                            className="w-full rounded-lg border border-slate-200 dark:border-slate-700 bg-transparent px-2 py-1"
+                            className="w-full rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 text-slate-900 dark:text-slate-100 px-2 py-1"
                           >
                             <option value="link">Inline link</option>
                             <option value="button">Button</option>
