@@ -50,15 +50,15 @@ export function AdminDashboard({ products, users, orders }: AdminDashboardProps)
         {tiles.map((tile) => {
           const Icon = tile.icon;
           const isActive = activeTab === tile.id;
-          
+
           return (
             <motion.button
               key={tile.id}
               onClick={() => setActiveTab(isActive ? null : (tile.id as any))}
-              className={`relative overflow-hidden rounded-2xl p-6 text-left transition-all duration-300 ${
-                isActive 
+              className={`relative overflow-hidden rounded-2xl p-6 text-left transition-all duration-300 card-surface ${
+                isActive
                   ? 'ring-2 ring-offset-2 ring-offset-white dark:ring-offset-slate-950 ring-brand shadow-xl'
-                  : 'shadow-md hover:shadow-lg'
+                  : 'hover:shadow-xl'
               }`}
               whileHover={{ scale: 1.02 }}
               whileTap={{ scale: 0.98 }}
@@ -67,15 +67,19 @@ export function AdminDashboard({ products, users, orders }: AdminDashboardProps)
               <div className={`absolute inset-0 bg-gradient-to-br ${tile.color} opacity-10 dark:opacity-20`} />
               
               {/* Content */}
-              <div className="relative z-10 space-y-3">
+              <div className="relative z-10 space-y-4">
                 <div className="flex items-center justify-between">
+                  <span className="chip text-xs bg-white/80 dark:bg-slate-900/80">{tile.count} live</span>
                   <Icon className={`h-8 w-8 bg-gradient-to-br ${tile.color} bg-clip-text text-transparent`} />
-                  {isActive && <span className="text-lg">▼</span>}
                 </div>
-                <div>
+                <div className="space-y-2">
+                  <p className="text-sm font-semibold text-slate-700 dark:text-slate-200">{tile.label}</p>
+                  <p className="text-3xl font-extrabold leading-none">{tile.count}</p>
                   <p className="text-sm text-slate-500 dark:text-slate-400">{tile.description}</p>
-                  <p className="text-3xl font-bold mt-1">{tile.count}</p>
-                  <p className="text-sm font-semibold text-slate-700 dark:text-slate-200 mt-2">{tile.label}</p>
+                </div>
+                <div className="flex items-center justify-end text-sm font-semibold text-brand gap-2">
+                  <span>{isActive ? 'Selected' : 'View'}</span>
+                  <span aria-hidden>➜</span>
                 </div>
               </div>
             </motion.button>

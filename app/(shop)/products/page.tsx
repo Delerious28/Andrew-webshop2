@@ -1,6 +1,6 @@
 import { prisma } from '@/lib/prisma';
-import { ProductCard } from '@/components/ProductCard';
 import { motion } from 'framer-motion';
+import { ProductsExplorer } from '@/components/ProductsExplorer';
 
 export default async function ProductsPage() {
   const products = await prisma.product.findMany({ 
@@ -12,21 +12,14 @@ export default async function ProductsPage() {
       <motion.div
         initial={{ opacity: 0, y: 16 }}
         animate={{ opacity: 1, y: 0 }}
-        className="flex flex-col gap-2"
+        className="flex flex-col gap-3 max-w-3xl"
       >
         <p className="text-sm text-brand font-semibold">Curated by Remoof</p>
-        <h1 className="text-3xl font-bold">Shop components</h1>
-        <p className="text-slate-600 dark:text-slate-300">Precision parts with immersive previews and Stripe-ready checkout.</p>
+        <h1 className="text-4xl font-extrabold leading-tight">Shop components</h1>
+        <p className="text-base text-slate-500 dark:text-slate-200">Precision parts with immersive previews and Stripe-ready checkout.</p>
       </motion.div>
-      <motion.div
-        initial={{ opacity: 0, y: 16 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ delay: 0.1 }}
-        className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3"
-      >
-        {products.map((product) => (
-          <ProductCard key={product.id} product={product} />
-        ))}
+      <motion.div initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1 }}>
+        <ProductsExplorer products={products} />
       </motion.div>
     </div>
   );
