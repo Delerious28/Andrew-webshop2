@@ -22,11 +22,13 @@ export async function PUT(req: Request, { params }: Params) {
   const updated = await prisma.product.update({
     where: { id: params.id },
     data: {
+      sku: parsed.data.sku || '',
       title: parsed.data.title,
       description: parsed.data.description,
       price: parsed.data.price,
       category: parsed.data.category,
-      stock: parsed.data.stock
+      stock: parsed.data.stock,
+      status: parsed.data.status || 'LIVE'
     },
     include: { images: true }
   });

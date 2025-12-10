@@ -2,6 +2,7 @@
 
 import { createContext, useCallback, useContext, useEffect, useMemo, useState } from 'react';
 import { useNotifications } from '../NotificationCenter';
+import { useSession } from 'next-auth/react';
 
 export type CartItem = {
   productId: string;
@@ -16,6 +17,7 @@ interface CartContextValue {
   items: CartItem[];
   ready: boolean;
   subtotal: number;
+  totalQuantity: number;
   addItem: (item: CartItem) => void;
   updateQuantity: (productId: string, quantity: number) => void;
   removeItem: (productId: string) => void;
@@ -27,20 +29,48 @@ const STORAGE_KEY = 'remoof-cart';
 
 export function CartProvider({ children }: { children: React.ReactNode }) {
   const { notify } = useNotifications();
+  const { status } = useSession();
   const [items, setItems] = useState<CartItem[]>([]);
   const [ready, setReady] = useState(false);
 
   useEffect(() => {
-    const stored = typeof window !== 'undefined' ? localStorage.getItem(STORAGE_KEY) : null;
-    if (stored) {
+    async function syncServerCart() {
       try {
-        setItems(JSON.parse(stored));
+        const res = await fetch('/api/cart');
+        if (!res.ok) throw new Error('Unable to fetch cart');
+        const serverItems = await res.json();
+        const mapped = serverItems.map((item: any) => ({
+          productId: item.productId,
+          title: item.product?.title ?? 'Product',
+          price: item.product?.price ?? 0,
+          quantity: item.quantity,
+          image: item.product?.images?.[0]?.url,
+          category: item.product?.category
+        })) as CartItem[];
+        setItems(mapped);
       } catch (error) {
-        console.warn('Failed to parse cart storage', error);
+        console.warn('Failed to sync server cart', error);
+      } finally {
+        setReady(true);
       }
     }
-    setReady(true);
-  }, []);
+
+    if (status === 'authenticated') {
+      syncServerCart();
+    }
+
+    if (status === 'unauthenticated') {
+      const stored = typeof window !== 'undefined' ? localStorage.getItem(STORAGE_KEY) : null;
+      if (stored) {
+        try {
+          setItems(JSON.parse(stored));
+        } catch (error) {
+          console.warn('Failed to parse cart storage', error);
+        }
+      }
+      setReady(true);
+    }
+  }, [status]);
 
   useEffect(() => {
     if (!ready) return;
@@ -60,32 +90,64 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
         }
         return [...prev, incoming];
       });
+
+      if (status === 'authenticated') {
+        fetch('/api/cart', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ productId: incoming.productId, quantity: incoming.quantity })
+        }).catch((error) => console.warn('Failed to persist cart', error));
+      }
+
       notify({
         title: 'Added to cart',
         message: `${incoming.title} (${incoming.quantity}x) is waiting in your bag`,
         tone: 'success'
       });
     },
-    [notify]
+    [notify, status]
   );
 
   const updateQuantity = useCallback(
     (productId: string, quantity: number) => {
-      setItems((prev) => prev.map((item) => (item.productId === productId ? { ...item, quantity } : item)));
+      let delta = 0;
+      setItems((prev) => {
+        const existing = prev.find((item) => item.productId === productId);
+        if (!existing) return prev;
+        delta = quantity - existing.quantity;
+        return prev.map((item) => (item.productId === productId ? { ...item, quantity } : item));
+      });
+
+      if (status === 'authenticated' && delta !== 0) {
+        fetch('/api/cart', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ productId, quantity: delta })
+        }).catch((error) => console.warn('Failed to update cart quantity', error));
+      }
     },
-    []
+    [status]
   );
 
   const removeItem = useCallback(
     (productId: string) => {
       setItems((prev) => prev.filter((item) => item.productId !== productId));
+
+      if (status === 'authenticated') {
+        fetch('/api/cart', {
+          method: 'DELETE',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ productId })
+        }).catch((error) => console.warn('Failed to remove cart item', error));
+      }
+
       notify({
         title: 'Removed from cart',
         message: 'Item removed from your cart',
         tone: 'info'
       });
     },
-    [notify]
+    [notify, status]
   );
 
   const clear = useCallback(() => {
@@ -93,10 +155,11 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
   }, []);
 
   const subtotal = useMemo(() => items.reduce((sum, item) => sum + item.price * item.quantity, 0), [items]);
+  const totalQuantity = useMemo(() => items.reduce((sum, item) => sum + item.quantity, 0), [items]);
 
   const value = useMemo(
-    () => ({ items, ready, subtotal, addItem, updateQuantity, removeItem, clear }),
-    [items, ready, subtotal, addItem, updateQuantity, removeItem, clear]
+    () => ({ items, ready, subtotal, totalQuantity, addItem, updateQuantity, removeItem, clear }),
+    [items, ready, subtotal, totalQuantity, addItem, updateQuantity, removeItem, clear]
   );
 
   return <CartContext.Provider value={value}>{children}</CartContext.Provider>;

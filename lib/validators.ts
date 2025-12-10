@@ -16,11 +16,13 @@ export const mediaItemSchema = z.object({
 });
 
 export const productSchema = z.object({
+  sku: z.string().max(80).optional(),
   title: z.string().min(1),
   description: z.string().min(1),
   price: z.number().int().positive(),
   category: z.string().min(1),
   stock: z.number().int().nonnegative(),
+  status: z.enum(['LIVE', 'DRAFT', 'ARCHIVED']).optional(),
   images: z.array(z.string().url()).optional(),
   media: z.array(mediaItemSchema).optional()
 });

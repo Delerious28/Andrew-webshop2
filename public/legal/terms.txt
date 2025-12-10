@@ -1,0 +1,10 @@
+Remoof Terms of Service
+
+Ordering
+Orders require verified email accounts. Prices are shown in USD and charged via Stripe.
+
+Liability
+Remoof supplies components with no guarantee beyond manufacturer specs. Riding bicycles is inherently risky; you assume all responsibility for correct installation and safe operation.
+
+Warranty
+Components include a two-year manufacturing defect warranty. Damage from crashes, misuse, or improper installation is excluded.
