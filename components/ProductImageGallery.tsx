@@ -46,7 +46,11 @@ export function ProductImageGallery({ images, title }: ProductImageGalleryProps)
 
   // Don't render anything if there are no images
   if (allImages.length === 0) {
-    return null;
+    return (
+      <div className="relative w-full h-96 rounded-2xl overflow-hidden bg-slate-100 dark:bg-slate-900/70 grid place-items-center text-slate-400">
+        <span>No media uploaded yet</span>
+      </div>
+    );
   }
 
   return (

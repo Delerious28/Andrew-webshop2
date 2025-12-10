@@ -2,19 +2,21 @@
 
 import { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Package, Users, ShoppingCart } from 'lucide-react';
+import { Package, Users, ShoppingCart, HelpCircle } from 'lucide-react';
 import { ProductManager } from './ProductManager';
 import { AdminOrders } from './AdminOrders';
 import { AdminUsers } from './AdminUsers';
+import { AdminFaqManager } from './AdminFaqManager';
 
 interface AdminDashboardProps {
   products: any[];
   users: any[];
   orders: any[];
+  faqs: any[];
 }
 
-export function AdminDashboard({ products, users, orders }: AdminDashboardProps) {
-  const [activeTab, setActiveTab] = useState<'products' | 'orders' | 'users' | null>(null);
+export function AdminDashboard({ products, users, orders, faqs }: AdminDashboardProps) {
+  const [activeTab, setActiveTab] = useState<'products' | 'orders' | 'users' | 'faqs' | null>(null);
 
   const tiles = [
     {
@@ -40,6 +42,14 @@ export function AdminDashboard({ products, users, orders }: AdminDashboardProps)
       count: users.length,
       color: 'from-green-500 to-emerald-500',
       description: 'Search and review user shipping details'
+    },
+    {
+      id: 'faqs',
+      label: 'FAQ',
+      icon: HelpCircle,
+      count: faqs.filter((faq) => faq.isVisible).length,
+      color: 'from-orange-500 to-amber-500',
+      description: 'Manage questions and answers shown on site'
     }
   ];
 
@@ -148,6 +158,27 @@ export function AdminDashboard({ products, users, orders }: AdminDashboardProps)
                 </div>
               </div>
               <AdminUsers users={users} />
+            </div>
+          </motion.div>
+        )}
+
+        {activeTab === 'faqs' && (
+          <motion.div
+            key="faqs"
+            initial={{ opacity: 0, height: 0 }}
+            animate={{ opacity: 1, height: 'auto' }}
+            exit={{ opacity: 0, height: 0 }}
+            transition={{ duration: 0.3 }}
+            className="overflow-hidden"
+          >
+            <div className="rounded-2xl border border-slate-200 dark:border-slate-800 p-6 bg-white/50 dark:bg-slate-900/50 backdrop-blur space-y-4">
+              <div className="flex items-center justify-between">
+                <div>
+                  <h2 className="text-2xl font-bold">❓ FAQ</h2>
+                  <p className="text-sm text-slate-500 dark:text-slate-300">Manage questions and answers shown on the FAQ page</p>
+                </div>
+              </div>
+              <AdminFaqManager />
             </div>
           </motion.div>
         )}

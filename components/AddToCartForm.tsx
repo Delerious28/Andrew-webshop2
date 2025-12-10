@@ -1,13 +1,21 @@
 'use client';
 import { ShoppingCart } from 'lucide-react';
 import { useState } from 'react';
+import { useCart } from './cart/CartProvider';
+import { useSession } from 'next-auth/react';
 
 interface AddToCartFormProps {
   productId: string;
   stock?: number;
+  title?: string;
+  price?: number;
+  image?: string;
+  category?: string;
 }
 
-export function AddToCartForm({ productId, stock }: AddToCartFormProps) {
+export function AddToCartForm({ productId, stock, title, price, image, category }: AddToCartFormProps) {
+  const { status } = useSession();
+  const { addItem } = useCart();
   const [quantity, setQuantity] = useState(1);
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState('');
@@ -35,6 +43,9 @@ export function AddToCartForm({ productId, stock }: AddToCartFormProps) {
       });
 
       if (res.ok) {
+        if (status === 'authenticated' && title && typeof price === 'number') {
+          addItem({ productId, title, price, quantity, image, category });
+        }
         setMessage('Added to cart!');
         setQuantity(1);
         setJustAdded(true);

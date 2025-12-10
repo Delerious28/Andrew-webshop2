@@ -17,8 +17,7 @@ interface NavbarClientProps {
 export function NavbarClient({ session, role }: NavbarClientProps) {
   const [isAuthModalOpen, setIsAuthModalOpen] = useState(false);
   const [isProfileMenuOpen, setIsProfileMenuOpen] = useState(false);
-  const { items } = useCart();
-  const cartCount = items.reduce((sum, item) => sum + item.quantity, 0);
+  const { totalQuantity } = useCart();
   const isAdmin = role === 'ADMIN';
 
   return (
@@ -30,9 +29,9 @@ export function NavbarClient({ session, role }: NavbarClientProps) {
           className="relative rounded-full border border-slate-200 dark:border-slate-800 p-2 hover:bg-slate-100 dark:hover:bg-slate-900"
         >
           <ShoppingBag className="h-5 w-5" />
-          {cartCount > 0 && (
-            <span className="absolute -right-1 -top-1 h-5 min-w-[20px] rounded-full bg-brand text-[11px] font-semibold text-white grid place-items-center px-1">
-              {cartCount}
+          {totalQuantity > 0 && (
+            <span className="absolute -right-1 -top-1 inline-flex min-w-[1.1rem] items-center justify-center rounded-full bg-brand text-[11px] font-semibold text-white shadow-lg px-1">
+              {totalQuantity > 9 ? '9+' : totalQuantity}
             </span>
           )}
         </Link>

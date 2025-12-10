@@ -6,6 +6,8 @@ import { AuthModal } from '@/components/AuthModal';
 import { ArrowRight, ShieldCheck, Sparkles, Truck } from 'lucide-react';
 import { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
+import { PageShell } from '@/components/PageShell';
+import { useCart } from '@/components/cart/CartProvider';
 
 export default function HomePage() {
   const { data: session } = useSession();
@@ -13,6 +15,7 @@ export default function HomePage() {
   const [latest, setLatest] = useState<any[]>([]);
   const [showAuthModal, setShowAuthModal] = useState(false);
   const [addingFeatured, setAddingFeatured] = useState(false);
+  const { addItem } = useCart();
 
   useEffect(() => {
     async function loadProducts() {
@@ -29,7 +32,8 @@ export default function HomePage() {
   return (
     <>
       <AuthModal isOpen={showAuthModal} onClose={() => setShowAuthModal(false)} initialMode="signup" />
-      <div className="space-y-16">
+      <PageShell>
+        <div className="space-y-16">
         <section className="grid md:grid-cols-2 gap-10 items-center">
           <motion.div
             initial={{ opacity: 0, y: 30 }}
@@ -108,13 +112,17 @@ export default function HomePage() {
                         setShowAuthModal(true);
                         return;
                       }
-                      if (addingFeatured) return;
-                      setAddingFeatured(true);
-                      fetch('/api/cart', {
-                        method: 'POST',
-                        headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify({ productId: featured.id, quantity: 1 })
-                      }).finally(() => setAddingFeatured(false));
+                    if (addingFeatured) return;
+                    setAddingFeatured(true);
+                    addItem({
+                      productId: featured.id,
+                      title: featured.title,
+                      price: featured.price,
+                      quantity: 1,
+                      image: featured.images?.[0]?.url,
+                      category: featured.category
+                    });
+                    setTimeout(() => setAddingFeatured(false), 350);
                     }}
                     className="px-4 py-2 bg-brand text-white rounded-xl font-semibold shadow hover:-translate-y-0.5 transition disabled:opacity-70"
                     disabled={addingFeatured}
@@ -143,7 +151,8 @@ export default function HomePage() {
             ))}
           </div>
         </section>
-      </div>
+        </div>
+      </PageShell>
     </>
   );
 }

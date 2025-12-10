@@ -1,8 +1,7 @@
-'use client';
-
+import { prisma } from '@/lib/prisma';
 import { motion } from 'framer-motion';
 import { ProductsExplorer } from '@/components/ProductsExplorer';
-import { useEffect, useState } from 'react';
+import { PageShell } from '@/components/PageShell';
 
 interface ProductsPageProps {
   products: any[];
@@ -10,7 +9,8 @@ interface ProductsPageProps {
 
 function ProductsPageContent({ products }: ProductsPageProps) {
   return (
-    <div className="space-y-8">
+    <PageShell>
+      <div className="space-y-8">
       <motion.div
         initial={{ opacity: 0, y: 16 }}
         animate={{ opacity: 1, y: 0 }}
@@ -23,7 +23,8 @@ function ProductsPageContent({ products }: ProductsPageProps) {
       <motion.div initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1 }}>
         <ProductsExplorer products={products} />
       </motion.div>
-    </div>
+      </div>
+    </PageShell>
   );
 }
 

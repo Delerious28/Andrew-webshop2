@@ -1,5 +1,6 @@
 "use client";
 import { useState } from 'react';
+import { PageShell } from '@/components/PageShell';
 
 export default function ContactPage() {
   const [submitted, setSubmitted] = useState(false);
@@ -11,7 +12,8 @@ export default function ContactPage() {
   }
 
   return (
-    <div className="space-y-6">
+    <PageShell>
+      <div className="space-y-6">
       <header className="space-y-2">
         <p className="chip">Support</p>
         <h1 className="text-3xl font-bold">Contact us</h1>
@@ -67,6 +69,7 @@ export default function ContactPage() {
           <span className="chip">Trusted by riders</span>
         </div>
       </div>
-    </div>
+      </div>
+    </PageShell>
   );
 }
