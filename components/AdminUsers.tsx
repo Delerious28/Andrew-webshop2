@@ -233,8 +233,16 @@ export function AdminUsers({ users: initialUsers }: AdminUsersProps) {
         )}
       </AnimatePresence>
       <AnimatePresence mode="popLayout">
-        <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-4">
-          {filtered.map((user) => (
+        {filtered.length === 0 ? (
+          <div className="rounded-2xl border border-slate-200 dark:border-slate-800 p-8 text-center bg-white/50 dark:bg-slate-900/50">
+            <p className="text-slate-500 dark:text-slate-400 mb-2">No customers found</p>
+            <p className="text-xs text-slate-400 dark:text-slate-500">
+              {users.length === 0 ? 'No customers in the system yet.' : 'Try adjusting your search or filters.'}
+            </p>
+          </div>
+        ) : (
+          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-4">
+            {filtered.map((user) => (
             <motion.div
               key={user.id}
               layout
@@ -299,8 +307,9 @@ export function AdminUsers({ users: initialUsers }: AdminUsersProps) {
                 </button>
               </div>
             </motion.div>
-          ))}
-        </div>
+            ))}
+          </div>
+        )}
       </AnimatePresence>
     </div>
   );
