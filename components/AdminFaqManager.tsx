@@ -215,22 +215,19 @@ export function AdminFaqManager() {
                 <div className="flex-1 space-y-2">
                   <p className="font-semibold text-slate-900 dark:text-white">{entry.title}</p>
                   <div className="space-y-2">
-                    {entry.blocks.slice(0, 2).map((block, idx) => (
+                    {entry.blocks.map((block, idx) => (
                       <div key={idx} className="text-xs">
                         {block.type === 'image' && block.imageUrl && (
                           <img src={block.imageUrl} alt={block.alt || ''} className="max-w-full h-16 object-cover rounded border border-slate-200 dark:border-slate-700" />
                         )}
-                        {block.type === 'text' && (
+                        {block.type === 'text' && idx < 2 && (
                           <p className="text-slate-600 dark:text-slate-400 line-clamp-2">{block.content}</p>
                         )}
-                        {block.type === 'link' && (
+                        {block.type === 'link' && idx < 2 && (
                           <p className="text-brand">{block.label || block.url}</p>
                         )}
                       </div>
                     ))}
-                    {entry.blocks.length > 2 && (
-                      <p className="text-xs text-slate-400">+{entry.blocks.length - 2} more</p>
-                    )}
                   </div>
                 </div>
                 <div className="flex items-center gap-2">
@@ -352,18 +349,39 @@ export function AdminFaqManager() {
 
                   {block.type === 'image' && (
                     <div className="grid gap-2">
+                      <div className="flex gap-2">
+                        <input
+                          type="file"
+                          accept="image/*"
+                          onChange={async (e) => {
+                            const file = e.target.files?.[0];
+                            if (file) {
+                              const reader = new FileReader();
+                              reader.onloadend = () => {
+                                updateBlock(idx, { imageUrl: reader.result as string });
+                              };
+                              reader.readAsDataURL(file);
+                            }
+                          }}
+                          className="flex-1 rounded-lg border border-slate-200 dark:border-slate-700 bg-transparent px-3 py-2 text-sm file:mr-4 file:py-1 file:px-3 file:rounded file:border-0 file:text-sm file:font-semibold file:bg-brand/10 file:text-brand hover:file:bg-brand/20"
+                        />
+                      </div>
+                      <div className="text-xs text-slate-500 dark:text-slate-400 text-center">or</div>
                       <input
-                        value={block.imageUrl}
+                        value={block.imageUrl || ''}
                         onChange={(e) => updateBlock(idx, { imageUrl: e.target.value })}
                         className="rounded-lg border border-slate-200 dark:border-slate-700 bg-transparent px-3 py-2"
                         placeholder="Image URL"
                       />
                       <input
-                        value={block.alt}
+                        value={block.alt || ''}
                         onChange={(e) => updateBlock(idx, { alt: e.target.value })}
                         className="rounded-lg border border-slate-200 dark:border-slate-700 bg-transparent px-3 py-2"
                         placeholder="Alt text"
                       />
+                      {block.imageUrl && (
+                        <img src={block.imageUrl} alt="Preview" className="max-w-full h-32 object-cover rounded border border-slate-200 dark:border-slate-700" />
+                      )}
                     </div>
                   )}
 
