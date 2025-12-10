@@ -28,6 +28,7 @@ export async function POST(req: Request) {
     }
   });
 
+  let emailSent = true;
   try {
     await sendVerificationEmail(
       parsed.data.email,
@@ -36,8 +37,14 @@ export async function POST(req: Request) {
     );
   } catch (error) {
     console.error('Failed to send verification email:', error);
-    // Don't fail account creation if email fails, but log it
+    emailSent = false;
   }
 
-  return NextResponse.json({ message: 'Account created. Check your email to verify.' });
+  return NextResponse.json({
+    message: emailSent
+      ? 'Account created. Check your email to verify.'
+      : 'Account created. Verification email could not be delivered—use the provided link to verify.',
+    emailSent,
+    verificationToken: emailSent ? undefined : verificationToken
+  });
 }

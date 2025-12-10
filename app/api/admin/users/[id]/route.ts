@@ -49,7 +49,7 @@ export async function PUT(req: Request, { params }: { params: { id: string } }) 
   }
 
   const body = await req.json();
-  const { firstName, lastName, email, role, password } = body;
+  const { firstName, lastName, email, role, password, forceVerify } = body;
 
   const updateData: any = {};
   if (firstName) updateData.firstName = firstName;
@@ -58,6 +58,10 @@ export async function PUT(req: Request, { params }: { params: { id: string } }) 
   if (role) updateData.role = role;
   if (password) {
     updateData.password = await hash(password, 10);
+  }
+  if (forceVerify) {
+    updateData.emailVerified = new Date();
+    updateData.verificationToken = null;
   }
 
   try {

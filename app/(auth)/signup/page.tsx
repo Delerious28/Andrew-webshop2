@@ -1,10 +1,13 @@
 'use client';
 import { useState } from 'react';
 import { signupSchema } from '@/lib/validators';
+import { ShieldCheck } from 'lucide-react';
+import { LegalModal } from '@/components/LegalModal';
 
 export default function SignupPage() {
   const [message, setMessage] = useState('');
   const [loading, setLoading] = useState(false);
+  const [legalOpen, setLegalOpen] = useState(false);
 
   async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
@@ -54,12 +57,19 @@ export default function SignupPage() {
           <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">Password</label>
           <input name="password" type="password" placeholder="Enter a secure password" className="w-full rounded-lg border border-slate-200 dark:border-slate-800 bg-transparent px-3 py-2" required />
         </div>
-        <label className="flex items-center gap-2 text-sm">
-          <input name="terms" type="checkbox" required /> I accept the <a href="/legal/terms" className="text-brand">Terms of Service</a>
-        </label>
+        <div className="flex items-start gap-3 rounded-xl border border-slate-200 dark:border-slate-800 p-3 bg-slate-50 dark:bg-slate-900/40">
+          <input name="terms" type="checkbox" required className="mt-1 h-4 w-4 rounded border-slate-300 text-brand focus:ring-brand" />
+          <div className="text-sm text-slate-700 dark:text-slate-300">
+            <p className="font-semibold text-slate-900 dark:text-white">I accept the Terms of Service and Privacy Policy</p>
+            <button type="button" onClick={() => setLegalOpen(true)} className="text-xs text-brand font-semibold flex items-center gap-2">
+              <ShieldCheck className="h-4 w-4" /> Review policies
+            </button>
+          </div>
+        </div>
         <button disabled={loading} className="w-full bg-brand text-white py-2 rounded-lg font-semibold">{loading ? 'Creating...' : 'Sign up'}</button>
         {message && <p className="text-sm text-brand">{message}</p>}
       </form>
+      <LegalModal open={legalOpen} onClose={() => setLegalOpen(false)} />
     </div>
   );
 }
