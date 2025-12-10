@@ -2,7 +2,10 @@ import { prisma } from '@/lib/prisma';
 import { ProductCard } from '@/components/ProductCard';
 
 export default async function ProductsPage() {
-  const products = await prisma.product.findMany({ orderBy: { createdAt: 'desc' } });
+  const products = await prisma.product.findMany({ 
+    orderBy: { createdAt: 'desc' },
+    include: { images: true }
+  });
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">

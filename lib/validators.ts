@@ -12,14 +12,14 @@ export const mediaItemSchema = z.object({
   id: z.string(),
   url: z.string(),
   type: z.enum(['image', 'video']),
-  order: z.number().int().nonnegative()
+  order: z.number().int().nonnegative().optional()
 });
 
 export const productSchema = z.object({
-  title: z.string().min(3),
-  description: z.string().min(10),
+  title: z.string().min(1),
+  description: z.string().min(1),
   price: z.number().int().positive(),
-  category: z.string().min(2),
+  category: z.string().min(1),
   stock: z.number().int().nonnegative(),
   images: z.array(z.string().url()).optional(),
   media: z.array(mediaItemSchema).optional()

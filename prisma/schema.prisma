@@ -20,6 +20,7 @@ model User {
   resetTokenExpiry  DateTime?
   addresses         Address[]
   orders            Order[]
+  cartItems         CartItem[]
   createdAt         DateTime  @default(now())
   updatedAt         DateTime  @updatedAt
 }
@@ -45,10 +46,9 @@ model Product {
   price       Int
   category    String
   stock       Int
-  heroImage   String
-  modelUrl    String?
   images      ProductImage[]
   orderItems  OrderItem[]
+  cartItems   CartItem[]
   createdAt   DateTime        @default(now())
   updatedAt   DateTime        @updatedAt
 }
@@ -85,4 +85,17 @@ model OrderItem {
   productId String
   quantity  Int
   price     Int
+}
+
+model CartItem {
+  id        String   @id @default(cuid())
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId    String
+  product   Product  @relation(fields: [productId], references: [id], onDelete: Cascade)
+  productId String
+  quantity  Int      @default(1)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@unique([userId, productId])
 }

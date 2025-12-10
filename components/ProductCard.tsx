@@ -3,10 +3,16 @@ import Image from 'next/image';
 import { ShoppingCart } from 'lucide-react';
 
 export function ProductCard({ product }: { product: any }) {
+  const firstImage = product.images?.[0]?.url;
+  
   return (
     <Link href={`/products/${product.id}`} className="glass-card p-4 flex flex-col gap-3 hover:-translate-y-1 transition">
-      <div className="relative w-full h-52 overflow-hidden rounded-xl">
-        <Image src={product.heroImage} alt={product.title} fill className="object-cover" />
+      <div className="relative w-full h-52 overflow-hidden rounded-xl bg-slate-200 dark:bg-slate-800">
+        {firstImage ? (
+          <Image src={firstImage} alt={product.title} fill className="object-contain" />
+        ) : (
+          <div className="w-full h-full flex items-center justify-center text-slate-500">No image</div>
+        )}
       </div>
       <div className="flex-1 flex flex-col gap-2">
         <div className="flex items-center justify-between">

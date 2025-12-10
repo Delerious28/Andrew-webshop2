@@ -95,7 +95,6 @@ export function ProductManager({ products }: ProductManagerProps) {
         ...newProduct,
         price: Number(newProduct.price),
         stock: Number(newProduct.stock),
-        modelUrl: newProduct.modelUrl || undefined,
         media: newProductMedia
       })
     });
@@ -122,7 +121,6 @@ export function ProductManager({ products }: ProductManagerProps) {
         ...payload,
         price: Number(payload.price),
         stock: Number(payload.stock),
-        modelUrl: payload.modelUrl || undefined,
         media: media
       })
     });

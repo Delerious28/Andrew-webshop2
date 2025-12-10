@@ -14,7 +14,10 @@ export async function POST(req: Request) {
   if ((session?.user as any)?.role !== 'ADMIN') return NextResponse.json({ message: 'Forbidden' }, { status: 403 });
   const body = await req.json();
   const parsed = productSchema.safeParse(body);
-  if (!parsed.success) return NextResponse.json({ message: parsed.error.message }, { status: 400 });
+  if (!parsed.success) {
+    console.error('Validation error:', parsed.error.errors);
+    return NextResponse.json({ message: 'Validation failed', errors: parsed.error.errors }, { status: 400 });
+  }
   
   // Use new media array if provided, otherwise fall back to images array
   const mediaToCreate = parsed.data.media || (parsed.data.images?.map((url) => ({ url, type: 'image' })) ?? []);

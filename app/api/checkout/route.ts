@@ -1,37 +1,68 @@
 import { NextResponse } from 'next/server';
-import { stripe } from '@/lib/stripe';
+import Stripe from 'stripe';
 import { prisma } from '@/lib/prisma';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth';
 
+const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!);
+
 export async function POST(req: Request) {
-  const session = await getServerSession(authOptions);
-  if (!session?.user) return NextResponse.json({ message: 'Unauthorized' }, { status: 401 });
-  const { items, addressId } = await req.json();
-  if (!Array.isArray(items) || !addressId) return NextResponse.json({ message: 'Invalid payload' }, { status: 400 });
+  try {
+    const session = await getServerSession(authOptions);
+    if (!session?.user?.email) {
+      return NextResponse.json({ message: 'Unauthorized' }, { status: 401 });
+    }
 
-  const lineItems = await Promise.all(
-    items.map(async ({ productId, quantity }: any) => {
-      const product = await prisma.product.findUnique({ where: { id: productId } });
-      if (!product) throw new Error('Product not found');
-      return {
-        price_data: {
-          currency: 'usd',
-          product_data: { name: product.title },
-          unit_amount: product.price,
+    const user = await prisma.user.findUnique({
+      where: { email: session.user.email },
+      include: {
+        cartItems: {
+          include: { product: true }
+        }
+      }
+    });
+
+    if (!user || !user.cartItems || user.cartItems.length === 0) {
+      return NextResponse.json({ message: 'Cart is empty' }, { status: 400 });
+    }
+
+    const lineItems = user.cartItems.map((item) => ({
+      price_data: {
+        currency: 'usd',
+        product_data: {
+          name: item.product.title,
+          description: item.product.description,
         },
-        quantity,
-      } as any;
-    })
-  );
+        unit_amount: item.product.price,
+      },
+      quantity: item.quantity,
+    }));
 
-  const checkout = await stripe.checkout.sessions.create({
-    mode: 'payment',
-    line_items: lineItems,
-    success_url: `${process.env.APP_BASE_URL}/checkout?success=1`,
-    cancel_url: `${process.env.APP_BASE_URL}/cart`,
-    metadata: { userId: (session.user as any).id, addressId },
-  });
+    const checkoutSession = await stripe.checkout.sessions.create({
+      payment_method_types: [
+        'card',
+        'ideal',
+        'paypal',
+        'sepa_debit',
+        'bancontact',
+        'alipay',
+        'p24',
+        'klarna',
+      ],
+      line_items: lineItems,
+      mode: 'payment',
+      success_url: `${process.env.APP_BASE_URL}/checkout/success?session_id={CHECKOUT_SESSION_ID}`,
+      cancel_url: `${process.env.APP_BASE_URL}/cart`,
+      customer_email: user.email,
+      metadata: {
+        userId: user.id,
+      },
+      locale: 'auto',
+    });
 
-  return NextResponse.json({ url: checkout.url });
+    return NextResponse.json({ url: checkoutSession.url });
+  } catch (error) {
+    console.error('Checkout error:', error);
+    return NextResponse.json({ message: 'Checkout failed' }, { status: 500 });
+  }
 }
