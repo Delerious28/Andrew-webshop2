@@ -4,8 +4,14 @@ import { productSchema } from '@/lib/validators';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth';
 
-export async function GET() {
-  const products = await prisma.product.findMany({ include: { images: true } });
+export async function GET(req: Request) {
+  const url = new URL(req.url);
+  const includeAll = url.searchParams.get('all') === 'true';
+  const products = await prisma.product.findMany({
+    where: includeAll ? undefined : { status: 'LIVE' },
+    include: { images: true },
+    orderBy: { createdAt: 'desc' }
+  });
   return NextResponse.json(products);
 }
 
@@ -24,11 +30,13 @@ export async function POST(req: Request) {
   
   const created = await prisma.product.create({
     data: {
+      sku: parsed.data.sku || '',
       title: parsed.data.title,
       description: parsed.data.description,
       price: parsed.data.price,
       category: parsed.data.category,
       stock: parsed.data.stock,
+      status: parsed.data.status || 'LIVE',
       images: mediaToCreate.length > 0 ? {
         create: mediaToCreate.map((media) => ({
           url: media.url,
