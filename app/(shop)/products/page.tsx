@@ -3,11 +3,11 @@ import { motion } from 'framer-motion';
 import { ProductsExplorer } from '@/components/ProductsExplorer';
 import { PageShell } from '@/components/PageShell';
 
-export default async function ProductsPage() {
-  const products = await prisma.product.findMany({ 
-    orderBy: { createdAt: 'desc' },
-    include: { images: true }
-  });
+interface ProductsPageProps {
+  products: any[];
+}
+
+function ProductsPageContent({ products }: ProductsPageProps) {
   return (
     <PageShell>
       <div className="space-y-8">
@@ -26,4 +26,14 @@ export default async function ProductsPage() {
       </div>
     </PageShell>
   );
+}
+
+import { prisma } from '@/lib/prisma';
+
+export default async function ProductsPage() {
+  const products = await prisma.product.findMany({ 
+    orderBy: { createdAt: 'desc' },
+    include: { images: true }
+  });
+  return <ProductsPageContent products={products} />;
 }
