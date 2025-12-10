@@ -35,7 +35,7 @@ export default function HomePage() {
             initial={{ opacity: 0, y: 30 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.5 }}
-            className="flex flex-col space-y-6 max-w-2xl"
+            className="flex flex-col space-y-6 max-w-xl"
           >
             <div className="chip border-brand/40 text-brand bg-brand/10">
               <Sparkles className="h-4 w-4" /> Remoof · Modern cycling hardware
@@ -70,6 +70,10 @@ export default function HomePage() {
                 </button>
               )}
             </div>
+            <Link href="/products" className="flex items-center gap-2 text-sm font-semibold text-slate-700 dark:text-slate-200">
+              View all wheels
+              <ArrowRight className="h-4 w-4" />
+            </Link>
             <div className="grid grid-cols-2 gap-4 text-sm text-slate-600 dark:text-slate-300">
               <div className="rounded-2xl border border-slate-200 dark:border-slate-800 p-3 flex items-center gap-3 bg-white/70 dark:bg-slate-900/70">
                 <Truck className="h-4 w-4 text-brand" />
@@ -87,13 +91,16 @@ export default function HomePage() {
             transition={{ duration: 0.6, delay: 0.1 }}
             className="card-surface p-8 space-y-6"
           >
+            <p className="text-xs font-semibold text-slate-500 dark:text-slate-300 tracking-wide uppercase">
+              Featured upgrade · Perfect for endurance builds
+            </p>
             <div className="flex items-center justify-between">
               <p className="text-sm font-semibold text-slate-700 dark:text-slate-200">Featured product</p>
               <span className="chip bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-200 border-emerald-200/60 dark:border-emerald-700/50">New drop</span>
             </div>
             {featured && (
               <div className="space-y-4">
-                <ProductCard product={featured} accent showNewBadge />
+                <ProductCard product={featured} accent showNewBadge specLine="140mm PWM fan · RGB ring" />
                 <div className="flex flex-wrap items-center gap-3">
                   <button
                     onClick={() => {

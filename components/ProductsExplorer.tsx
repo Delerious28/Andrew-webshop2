@@ -30,17 +30,25 @@ export function ProductsExplorer({ products }: ProductsExplorerProps) {
 
   return (
     <div className="space-y-6">
-      <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between rounded-2xl border border-slate-200/70 dark:border-slate-800/70 bg-white/60 dark:bg-slate-900/60 p-4 shadow-sm">
-        <div className="flex flex-wrap gap-2">
-          {categories.map((cat) => (
-            <button
-              key={cat}
-              onClick={() => startTransition(() => setActiveCategory(cat))}
-              className={`chip ${activeCategory === cat ? 'bg-brand text-white border-brand' : 'hover:border-brand/50'}`}
-            >
-              {cat}
-            </button>
-          ))}
+      <div className="flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between rounded-2xl border border-slate-200/70 dark:border-slate-800/70 bg-white/60 dark:bg-slate-900/60 p-4 shadow-sm">
+        <div className="flex flex-col gap-2">
+          <p className="text-xs font-semibold text-slate-500 dark:text-slate-300 uppercase tracking-wide">Categories</p>
+          <div className="flex flex-wrap gap-2">
+            {categories.map((cat) => (
+              <motion.button
+                whileTap={{ scale: 0.97 }}
+                key={cat}
+                onClick={() => startTransition(() => setActiveCategory(cat))}
+                className={`chip transition-all ${
+                  activeCategory === cat
+                    ? 'bg-brand text-white border-brand shadow-[0_10px_30px_-12px_rgba(56,189,248,0.7)] ring-2 ring-brand/30'
+                    : 'hover:border-brand/50'
+                }`}
+              >
+                {cat}
+              </motion.button>
+            ))}
+          </div>
         </div>
         <div className="flex items-center gap-3 text-sm text-slate-500 dark:text-slate-300">
           <label className="font-semibold">Sort</label>

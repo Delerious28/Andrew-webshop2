@@ -3,6 +3,7 @@ import { notFound } from 'next/navigation';
 import Script from 'next/script';
 import { ProductImageGallery } from '@/components/ProductImageGallery';
 import { AddToCartForm } from '@/components/AddToCartForm';
+import { ProductDetailTabs } from '@/components/ProductDetailTabs';
 
 interface Props {
   params: { id: string };
@@ -11,6 +12,7 @@ interface Props {
 export default async function ProductDetail({ params }: Props) {
   const product = await prisma.product.findUnique({ where: { id: params.id }, include: { images: { orderBy: { order: 'asc' } } } });
   if (!product) return notFound();
+  const brand = (product as any).brand || 'Remoof Works';
 
   return (
     <div className="grid lg:grid-cols-2 gap-12">
@@ -20,7 +22,10 @@ export default async function ProductDetail({ params }: Props) {
       </div>
       <div className="space-y-7">
         <div className="space-y-3">
-          <p className="chip bg-brand/10 text-brand border-brand/40 w-fit">{product.category}</p>
+          <div className="flex flex-wrap gap-2">
+            <p className="chip bg-slate-100 text-slate-800 dark:bg-slate-900/50 dark:text-slate-200 border-slate-200/70">{brand}</p>
+            <p className="chip bg-brand/10 text-brand border-brand/40">{product.category || 'Components'}</p>
+          </div>
           <h1 className="text-4xl font-extrabold leading-tight">{product.title}</h1>
           <p className="text-3xl font-bold text-slate-900 dark:text-white">${(product.price / 100).toFixed(2)}</p>
           <div className="flex items-center gap-3 text-sm text-slate-500 dark:text-slate-300">
@@ -42,22 +47,33 @@ export default async function ProductDetail({ params }: Props) {
         </div>
         <div className="card-surface p-5 space-y-3">
           <h3 className="text-lg font-semibold">Add to cart</h3>
-          <AddToCartForm productId={product.id} />
+          <AddToCartForm productId={product.id} stock={product.stock} />
         </div>
-        <div className="grid gap-4 md:grid-cols-3">
-          <div className="rounded-2xl border border-slate-200 dark:border-slate-800 p-4 bg-white/60 dark:bg-slate-900/60">
-            <p className="font-semibold">You may also like</p>
-            <p className="text-sm text-slate-500 dark:text-slate-300">Cross-sell suggestions coming soon.</p>
-          </div>
-          <div className="rounded-2xl border border-slate-200 dark:border-slate-800 p-4 bg-white/60 dark:bg-slate-900/60">
-            <p className="font-semibold">Specifications</p>
-            <p className="text-sm text-slate-500 dark:text-slate-300">Material, weight, and fit details will live here.</p>
-          </div>
-          <div className="rounded-2xl border border-slate-200 dark:border-slate-800 p-4 bg-white/60 dark:bg-slate-900/60">
-            <p className="font-semibold">Reviews</p>
-            <p className="text-sm text-slate-500 dark:text-slate-300">Be the first to review this component.</p>
-          </div>
-        </div>
+        <ProductDetailTabs
+          sections={[
+            {
+              id: 'specs',
+              label: 'Specifications',
+              content: (
+                <ul className="list-disc pl-5 space-y-1 text-sm text-slate-600 dark:text-slate-300">
+                  <li>Carbon-grade hardware with endurance testing</li>
+                  <li>Lightweight build tuned for long rides</li>
+                  <li>Compatible with major drivetrain standards</li>
+                </ul>
+              )
+            },
+            {
+              id: 'related',
+              label: 'You may also like',
+              content: <p className="text-sm text-slate-600 dark:text-slate-300">Cross-sell suggestions coming soon.</p>
+            },
+            {
+              id: 'reviews',
+              label: 'Reviews',
+              content: <p className="text-sm text-slate-600 dark:text-slate-300">Be the first to review this component.</p>
+            }
+          ]}
+        />
       </div>
     </div>
   );
