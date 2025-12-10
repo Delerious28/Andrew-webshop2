@@ -136,17 +136,22 @@ export default function CartPage() {
 
   if (cartItems.length === 0) {
     return (
-      <main className="mx-auto max-w-4xl px-4 py-16 space-y-6">
+      <main className="mx-auto max-w-5xl px-6 py-16 space-y-8">
         <div className="space-y-2">
-          <h1 className="text-3xl font-semibold">Your Cart</h1>
+          <h1 className="text-4xl font-bold">Your Cart</h1>
           <p className="text-slate-600 dark:text-slate-300">Your cart is empty.</p>
         </div>
-        <Link
-          href="/products"
-          className="inline-flex items-center gap-2 rounded-lg bg-brand px-4 py-2 text-white shadow hover:opacity-90"
-        >
-          Continue shopping
-        </Link>
+        <div className="card-surface p-10 text-center space-y-4">
+          <div className="mx-auto h-20 w-20 rounded-full bg-brand/10 flex items-center justify-center text-brand text-3xl">🛒</div>
+          <p className="text-lg font-semibold">No items yet</p>
+          <p className="text-slate-600 dark:text-slate-300">Browse the catalogue and add components to see them here.</p>
+          <Link
+            href="/products"
+            className="inline-flex items-center gap-2 rounded-xl bg-brand px-5 py-3 text-white font-semibold shadow hover:-translate-y-0.5 transition"
+          >
+            Continue shopping
+          </Link>
+        </div>
       </main>
     );
   }
@@ -154,89 +159,107 @@ export default function CartPage() {
   const total = cartItems.reduce((sum, item) => sum + (item.product.price * item.quantity), 0);
 
   return (
-    <main className="mx-auto max-w-4xl px-4 py-16 space-y-6">
+    <main className="mx-auto max-w-6xl px-6 py-16 space-y-10">
       <div className="space-y-2">
-        <h1 className="text-3xl font-semibold">Your Cart</h1>
+        <h1 className="text-4xl font-bold">Your Cart</h1>
         <p className="text-slate-600 dark:text-slate-300">{cartItems.length} item(s)</p>
       </div>
 
-      <div className="space-y-4">
-        {cartItems.map((item) => (
-          <div key={item.id} className="flex gap-4 border border-slate-200 dark:border-slate-800 rounded-lg p-4">
-            <div className="relative w-24 h-24 overflow-hidden rounded-lg bg-slate-200 dark:bg-slate-800 flex-shrink-0">
-              {item.product.images?.[0] ? (
-                <Image
-                  src={item.product.images[0].url}
-                  alt={item.product.title}
-                  fill
-                  className="object-contain"
-                />
-              ) : (
-                <div className="w-full h-full flex items-center justify-center text-slate-500">No image</div>
-              )}
-            </div>
-
-            <div className="flex-1 flex flex-col justify-between">
-              <div>
-                <h3 className="font-semibold text-lg">{item.product.title}</h3>
-                <p className="text-sm text-slate-600 dark:text-slate-300">
-                  ${(item.product.price / 100).toFixed(2)} each
-                </p>
-              </div>
-
-              <div className="flex items-center gap-4">
-                <div className="flex items-center gap-2">
-                  <button
-                    onClick={() => updateQuantity(item.product.id, item.quantity - 1)}
-                    className="p-1 rounded hover:bg-slate-200 dark:hover:bg-slate-800"
-                  >
-                    <Minus className="h-4 w-4" />
-                  </button>
-                  <span className="w-8 text-center">{item.quantity}</span>
-                  <button
-                    onClick={() => updateQuantity(item.product.id, item.quantity + 1)}
-                    className="p-1 rounded hover:bg-slate-200 dark:hover:bg-slate-800"
-                  >
-                    <Plus className="h-4 w-4" />
-                  </button>
+      <div className="grid gap-8 lg:grid-cols-[1.7fr,1fr]">
+        <div className="space-y-4">
+          {cartItems.map((item) => (
+            <div key={item.id} className="card-surface p-5 flex flex-col gap-4">
+              <div className="flex gap-4">
+                <div className="relative w-28 h-28 overflow-hidden rounded-xl bg-slate-200 dark:bg-slate-800 flex-shrink-0">
+                  {item.product.images?.[0] ? (
+                    <Image
+                      src={item.product.images[0].url}
+                      alt={item.product.title}
+                      fill
+                      className="object-contain"
+                    />
+                  ) : (
+                    <div className="w-full h-full flex items-center justify-center text-slate-500">No image</div>
+                  )}
                 </div>
-
-                <p className="font-semibold text-lg">
-                  ${((item.product.price * item.quantity) / 100).toFixed(2)}
-                </p>
-
-                <button
-                  onClick={() => removeFromCart(item.product.id)}
-                  className="ml-auto p-2 rounded hover:bg-red-100 dark:hover:bg-red-900/30 text-red-600"
-                >
-                  <Trash2 className="h-5 w-5" />
-                </button>
+                <div className="flex-1 space-y-2">
+                  <div className="flex items-start justify-between gap-3">
+                    <div className="space-y-1">
+                      <h3 className="font-semibold text-lg">{item.product.title}</h3>
+                      <p className="text-sm text-slate-600 dark:text-slate-300">${(item.product.price / 100).toFixed(2)} each</p>
+                    </div>
+                    <button
+                      onClick={() => removeFromCart(item.product.id)}
+                      className="p-2 rounded-lg hover:bg-red-100 dark:hover:bg-red-900/30 text-red-600"
+                    >
+                      <Trash2 className="h-5 w-5" />
+                    </button>
+                  </div>
+                  <div className="flex flex-wrap items-center gap-4">
+                    <div className="flex items-center gap-2 rounded-xl border border-slate-200 dark:border-slate-800 px-2 py-1">
+                      <button
+                        onClick={() => updateQuantity(item.product.id, item.quantity - 1)}
+                        className="p-1 rounded hover:bg-slate-200 dark:hover:bg-slate-800"
+                      >
+                        <Minus className="h-4 w-4" />
+                      </button>
+                      <input
+                        type="number"
+                        min={1}
+                        value={item.quantity}
+                        onChange={(e) => updateQuantity(item.product.id, parseInt(e.target.value) || 1)}
+                        className="w-14 text-center bg-transparent focus:outline-none"
+                      />
+                      <button
+                        onClick={() => updateQuantity(item.product.id, item.quantity + 1)}
+                        className="p-1 rounded hover:bg-slate-200 dark:hover:bg-slate-800"
+                      >
+                        <Plus className="h-4 w-4" />
+                      </button>
+                    </div>
+                    <p className="text-sm text-slate-500 dark:text-slate-300">Move to wishlist</p>
+                    <p className="ml-auto text-lg font-semibold">${((item.product.price * item.quantity) / 100).toFixed(2)}</p>
+                  </div>
+                </div>
               </div>
             </div>
-          </div>
-        ))}
-      </div>
-
-      <div className="border-t border-slate-200 dark:border-slate-800 pt-6 space-y-4">
-        <div className="flex justify-between items-center text-lg font-semibold">
-          <span>Total:</span>
-          <span>${(total / 100).toFixed(2)}</span>
+          ))}
         </div>
 
-        <button
-          onClick={handleCheckout}
-          disabled={checkoutLoading}
-          className="w-full bg-brand text-white py-3 rounded-lg font-semibold hover:opacity-90 disabled:opacity-50"
-        >
-          {checkoutLoading ? 'Redirecting to Stripe...' : 'Checkout with Stripe'}
-        </button>
-
-        <Link
-          href="/products"
-          className="block text-center text-brand hover:underline"
-        >
-          Continue shopping
-        </Link>
+        <div className="card-surface p-6 space-y-4 h-fit">
+          <div>
+            <h2 className="text-xl font-semibold">Order Summary</h2>
+            <p className="text-sm text-slate-500 dark:text-slate-300">Review totals before checkout</p>
+          </div>
+          <div className="space-y-3 text-sm text-slate-600 dark:text-slate-200">
+            <div className="flex justify-between">
+              <span>Subtotal</span>
+              <span>${(total / 100).toFixed(2)}</span>
+            </div>
+            <div className="flex justify-between">
+              <span>Taxes</span>
+              <span>Calculated at checkout</span>
+            </div>
+            <div className="flex justify-between">
+              <span>Shipping</span>
+              <span>Free over $99</span>
+            </div>
+          </div>
+          <div className="flex justify-between items-center text-lg font-semibold pt-2 border-t border-slate-200 dark:border-slate-800">
+            <span>Total</span>
+            <span>${(total / 100).toFixed(2)}</span>
+          </div>
+          <button
+            onClick={handleCheckout}
+            disabled={checkoutLoading}
+            className="w-full bg-brand text-white py-3 rounded-xl font-semibold hover:opacity-90 disabled:opacity-50"
+          >
+            {checkoutLoading ? 'Redirecting to Stripe...' : 'Checkout with Stripe'}
+          </button>
+          <Link href="/products" className="block text-center text-brand hover:underline">
+            Continue shopping
+          </Link>
+        </div>
       </div>
     </main>
   );
