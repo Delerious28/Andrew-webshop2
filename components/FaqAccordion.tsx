@@ -2,28 +2,84 @@
 import { useMemo, useState } from 'react';
 import { ChevronDown, Link2 } from 'lucide-react';
 
-export type FaqBlock = { type: 'text' | 'image' | 'link'; content?: string; imageUrl?: string; alt?: string; label?: string; url?: string };
+export type FaqBlock = {
+  type: 'text' | 'image' | 'link';
+  content?: string;
+  imageUrl?: string;
+  alt?: string;
+  label?: string;
+  url?: string;
+  variant?: 'default' | 'muted' | 'highlight';
+  align?: 'left' | 'center';
+  emphasis?: 'normal' | 'semibold';
+  linkStyle?: 'link' | 'button' | 'chip';
+};
 export type FaqItem = { id: string; title: string; blocks: FaqBlock[]; anchor: string };
 
 export function FaqAccordion({ faqs }: { faqs: FaqItem[] }) {
-  const [openId, setOpenId] = useState<string | null>(faqs[0]?.id ?? null);
+  const [openId, setOpenId] = useState<string | null>(null);
   const categories = useMemo(() => ['All', 'Shipping', 'Returns', 'Orders', 'Installation'], []);
 
   const renderBlock = (block: FaqBlock, idx: number) => {
+    const variant = block.variant || 'default';
+    const align = block.align || 'left';
+    const emphasis = block.emphasis || 'normal';
+
+    const toneClasses = {
+      default: 'text-slate-600 dark:text-slate-200 bg-slate-50/50 dark:bg-slate-900/30 border border-slate-200/70 dark:border-slate-800/70',
+      muted: 'text-slate-500 dark:text-slate-400 bg-slate-100/50 dark:bg-slate-800/30 border border-slate-200/50 dark:border-slate-700/50',
+      highlight: 'text-brand bg-brand/5 dark:bg-brand/10 border border-brand/20 dark:border-brand/30'
+    };
+
+    const alignment = align === 'center' ? 'text-center items-center justify-center' : 'text-left items-start';
+    const weight = emphasis === 'semibold' ? 'font-semibold' : 'font-normal';
+
     if (block.type === 'image') {
       return (
-        <div key={idx} className="overflow-hidden rounded-xl border border-slate-200 dark:border-slate-800 bg-slate-50/70 dark:bg-slate-900/50">
+        <div
+          key={idx}
+          className={`rounded-xl border ${toneClasses[variant]} ${alignment} overflow-hidden`}
+        >
           <img src={block.imageUrl} alt={block.alt || 'FAQ media'} className="w-full object-cover" />
           {block.alt && <p className="text-xs text-slate-500 dark:text-slate-400 px-3 py-2">{block.alt}</p>}
         </div>
       );
     }
+
     if (block.type === 'link') {
+      if (block.linkStyle === 'button') {
+        return (
+          <a
+            key={idx}
+            className={`inline-flex items-center justify-center rounded-lg px-4 py-2 text-sm font-semibold bg-brand text-white hover:-translate-y-0.5 transition ${alignment}`}
+            href={block.url}
+            target="_blank"
+            rel="noreferrer"
+          >
+            {block.label || block.url || 'Link button'}
+          </a>
+        );
+      }
+
+      if (block.linkStyle === 'chip') {
+        return (
+          <a
+            key={idx}
+            className={`inline-flex items-center rounded-full bg-slate-200 dark:bg-slate-800 px-3 py-1 text-xs font-semibold text-slate-700 dark:text-slate-200 border border-slate-300 dark:border-slate-700 hover:bg-slate-300 dark:hover:bg-slate-700 transition ${alignment}`}
+            href={block.url}
+            target="_blank"
+            rel="noreferrer"
+          >
+            {block.label || block.url || 'Link chip'}
+          </a>
+        );
+      }
+
       return (
         <a
           key={idx}
+          className={`inline-flex items-center gap-2 text-brand hover:text-brand/80 underline underline-offset-4 ${alignment}`}
           href={block.url}
-          className="inline-flex items-center gap-2 text-brand hover:text-brand/80 underline"
           target="_blank"
           rel="noreferrer"
         >
@@ -31,8 +87,9 @@ export function FaqAccordion({ faqs }: { faqs: FaqItem[] }) {
         </a>
       );
     }
+
     return (
-      <p key={idx} className="text-sm text-slate-600 dark:text-slate-200 leading-relaxed">
+      <p key={idx} className={`text-sm leading-relaxed ${toneClasses[variant]} ${alignment} ${weight} rounded-xl px-4 py-3`}>
         {block.content}
       </p>
     );
