@@ -44,10 +44,10 @@ export default function HomePage() {
               Precision bicycle parts built for speed and endurance.
             </h1>
             <p className="text-lg text-slate-500 dark:text-slate-200 max-w-2xl">
-              Remoof delivers carbon-grade components, verified payments, and immersive 3D previews to remove doubt before you ride.
+              Remoof delivers carbon-grade components, trusted checkout, and hands-on setup guidance to remove doubt before you ride.
             </p>
             <ul className="grid sm:grid-cols-3 gap-3 text-sm text-slate-600 dark:text-slate-200">
-              {["Carbon-grade components", "Secure Stripe payments", "3D previews before you ride"].map((item) => (
+              {["Carbon-grade components", "Secure checkout", "Setup support from gear experts"].map((item) => (
                 <li key={item} className="flex items-start gap-2 rounded-2xl border border-slate-200/70 dark:border-slate-800/70 bg-white/70 dark:bg-slate-900/70 p-3 shadow-sm">
                   <span className="mt-0.5 h-2 w-2 rounded-full bg-brand" />
                   <span>{item}</span>
@@ -126,8 +126,8 @@ export default function HomePage() {
           <div className="flex items-center justify-between">
             <h2 className="text-3xl font-bold">Latest Items</h2>
             <div className="flex gap-2 text-xs text-slate-500">
-              <span className="chip">3D previews</span>
-              <span className="chip">Stripe-ready</span>
+              <span className="chip">Low-friction checkout</span>
+              <span className="chip">Fast dispatch</span>
             </div>
           </div>
           <div className="grid gap-6 sm:grid-cols-2 xl:grid-cols-3">

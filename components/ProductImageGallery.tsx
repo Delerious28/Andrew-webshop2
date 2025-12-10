@@ -3,6 +3,7 @@
 import { useState } from 'react';
 import Image from 'next/image';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
+import { AnimatePresence, motion } from 'framer-motion';
 
 // Type declaration for model-viewer custom element
 declare global {
@@ -20,12 +21,11 @@ interface ProductImage {
 }
 
 interface ProductImageGalleryProps {
-  heroImage: string;
   images: ProductImage[];
   title: string;
 }
 
-export function ProductImageGallery({ heroImage, images, title }: ProductImageGalleryProps) {
+export function ProductImageGallery({ images, title }: ProductImageGalleryProps) {
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
 
   // Use only product images (no hero image)
@@ -53,14 +53,25 @@ export function ProductImageGallery({ heroImage, images, title }: ProductImageGa
     <>
       {/* Main Image Display */}
       <div className="relative w-full h-96 rounded-2xl overflow-hidden bg-slate-100 dark:bg-slate-800">
-        <Image 
-          src={currentImage} 
-          alt={title} 
-          fill 
-          className="object-contain" 
-          priority
-        />
-        
+        <AnimatePresence mode="wait">
+          <motion.div
+            key={currentImage}
+            initial={{ opacity: 0, y: 12, scale: 0.99 }}
+            animate={{ opacity: 1, y: 0, scale: 1 }}
+            exit={{ opacity: 0, y: -8, scale: 0.995 }}
+            transition={{ duration: 0.25 }}
+            className="absolute inset-0"
+          >
+            <Image
+              src={currentImage}
+              alt={title}
+              fill
+              className="object-contain"
+              priority
+            />
+          </motion.div>
+        </AnimatePresence>
+
         {/* Navigation Arrows */}
         {allImages.length > 1 && (
           <>
