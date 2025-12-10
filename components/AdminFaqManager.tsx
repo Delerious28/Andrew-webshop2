@@ -212,9 +212,26 @@ export function AdminFaqManager() {
               }`}
             >
               <div className="flex items-start justify-between gap-3">
-                <div className="space-y-1">
+                <div className="flex-1 space-y-2">
                   <p className="font-semibold text-slate-900 dark:text-white">{entry.title}</p>
-                  <p className="text-xs text-slate-500 dark:text-slate-400">{entry.blocks.length} block(s)</p>
+                  <div className="space-y-2">
+                    {entry.blocks.slice(0, 2).map((block, idx) => (
+                      <div key={idx} className="text-xs">
+                        {block.type === 'image' && block.imageUrl && (
+                          <img src={block.imageUrl} alt={block.alt || ''} className="max-w-full h-16 object-cover rounded border border-slate-200 dark:border-slate-700" />
+                        )}
+                        {block.type === 'text' && (
+                          <p className="text-slate-600 dark:text-slate-400 line-clamp-2">{block.content}</p>
+                        )}
+                        {block.type === 'link' && (
+                          <p className="text-brand">{block.label || block.url}</p>
+                        )}
+                      </div>
+                    ))}
+                    {entry.blocks.length > 2 && (
+                      <p className="text-xs text-slate-400">+{entry.blocks.length - 2} more</p>
+                    )}
+                  </div>
                 </div>
                 <div className="flex items-center gap-2">
                   <button onClick={() => reorder(entry.id!, -1)} className="p-2 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-800" aria-label="Move up">
