@@ -1,0 +1,27 @@
+'use client';
+
+import { motion } from 'framer-motion';
+import { ProductsExplorer } from './ProductsExplorer';
+
+interface ProductsPageClientProps {
+  products: any[];
+}
+
+export function ProductsPageClient({ products }: ProductsPageClientProps) {
+  return (
+    <div className="space-y-8">
+      <motion.div
+        initial={{ opacity: 0, y: 16 }}
+        animate={{ opacity: 1, y: 0 }}
+        className="flex flex-col gap-3 max-w-3xl"
+      >
+        <p className="text-sm text-brand font-semibold">Curated by Remoof</p>
+        <h1 className="text-4xl font-extrabold leading-tight">Shop components</h1>
+        <p className="text-base text-slate-500 dark:text-slate-200">Precision parts with immersive previews and Stripe-ready checkout.</p>
+      </motion.div>
+      <motion.div initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1 }}>
+        <ProductsExplorer products={products} />
+      </motion.div>
+    </div>
+  );
+}
