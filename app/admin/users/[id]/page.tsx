@@ -3,10 +3,11 @@
 import { useEffect, useState } from 'react';
 import { useRouter, useParams } from 'next/navigation';
 import { useSession } from 'next-auth/react';
-import { 
-  ArrowLeft, User, Mail, Shield, Calendar, CheckCircle, XCircle, 
-  Edit2, Trash2, Save, X, ShoppingBag, DollarSign, MapPin 
+import {
+  ArrowLeft, User, Mail, Shield, Calendar, CheckCircle, XCircle,
+  Edit2, Trash2, Save, X, ShoppingBag, DollarSign, MapPin
 } from 'lucide-react';
+import { useNotifications } from '@/components/NotificationCenter';
 
 interface Address {
   id: string;
@@ -41,6 +42,7 @@ export default function UserDetailPage() {
   const router = useRouter();
   const params = useParams();
   const userId = params?.id as string;
+  const { notify } = useNotifications();
 
   const [user, setUser] = useState<UserDetails | null>(null);
   const [loading, setLoading] = useState(true);
@@ -111,9 +113,11 @@ export default function UserDetailPage() {
         await fetchUser();
         setEditing(false);
         setEditPassword('');
+        notify({ title: 'Account updated', message: 'Changes saved successfully.', tone: 'success' });
       }
     } catch (error) {
       console.error('Failed to update user:', error);
+      notify({ title: 'Update failed', message: 'Unable to save account changes.', tone: 'warning' });
     }
   };
 
@@ -130,13 +134,14 @@ export default function UserDetailPage() {
 
       if (res.ok) {
         router.push('/admin/users');
+        notify({ title: 'Account deleted', message: 'The account has been removed.', tone: 'warning' });
       } else {
         const data = await res.json();
-        alert(data.message || 'Failed to delete user');
+        notify({ title: 'Failed to delete user', message: data.message || 'Please try again.', tone: 'warning' });
       }
     } catch (error) {
       console.error('Failed to delete user:', error);
-      alert('Failed to delete user');
+      notify({ title: 'Delete failed', message: 'Network error. Try again.', tone: 'warning' });
     } finally {
       setDeleting(false);
     }
