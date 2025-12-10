@@ -41,9 +41,6 @@ export default function HomePage() {
             transition={{ duration: 0.5 }}
             className="flex flex-col space-y-6 max-w-xl h-fit"
           >
-            <div className="chip border-brand/40 text-brand bg-brand/10">
-              <Sparkles className="h-4 w-4" /> Remoof · Modern cycling hardware
-            </div>
             <h1 className="text-4xl md:text-5xl font-bold leading-tight">
               Precision bicycle parts built for speed and endurance.
             </h1>
@@ -93,7 +90,7 @@ export default function HomePage() {
             initial={{ opacity: 0, y: 30 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.6, delay: 0.1 }}
-            className="card-surface p-8 space-y-6"
+            className="card-surface p-6 space-y-4"
           >
             <p className="text-xs font-semibold text-slate-500 dark:text-slate-300 tracking-wide uppercase">
               Featured upgrade · Perfect for endurance builds
