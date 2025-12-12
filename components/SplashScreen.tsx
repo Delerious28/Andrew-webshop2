@@ -1,7 +1,7 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { Sparkles } from 'lucide-react';
+import { motion, AnimatePresence } from 'framer-motion';
 
 const SPLASH_COOKIE = 'remoof_splash_seen_at';
 const HOUR_MS = 60 * 60 * 1000;
@@ -33,41 +33,61 @@ export function SplashScreen() {
     }
   }, []);
 
-  if (!shouldShow) return null;
-
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/90 backdrop-blur">
-      <div className="relative max-w-lg w-full mx-6 overflow-hidden rounded-3xl border border-slate-800 bg-gradient-to-br from-slate-900 via-slate-950 to-black p-10 shadow-2xl">
-        <div className="absolute inset-0 bg-gradient-to-tr from-brand/10 via-transparent to-brand/30 blur-3xl" aria-hidden />
-        <div className="relative space-y-6 text-center text-white">
-          <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-full bg-brand/20 text-brand">
-            <Sparkles className="h-6 w-6" />
-          </div>
-          <div className="space-y-2">
-            <p className="text-sm uppercase tracking-[0.35em] text-slate-300">Remoof</p>
-            <h2 className="text-3xl font-semibold leading-tight">Premium bicycle parts, crafted for speed.</h2>
-            <p className="text-slate-300">
-              Experience the refreshed Remoof storefront with immersive 3D previews, tuned checkout, and a polished admin-grade UI.
-            </p>
-          </div>
-          <div className="flex items-center justify-center gap-4">
-            <button
-              type="button"
-              onClick={() => setShouldShow(false)}
-              className="rounded-full bg-brand px-5 py-2 text-sm font-semibold text-white shadow-lg shadow-brand/30 transition hover:-translate-y-0.5 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand"
+    <AnimatePresence>
+      {shouldShow && (
+        <motion.div
+          className="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/90 backdrop-blur"
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          exit={{ opacity: 0 }}
+          transition={{ duration: 0.35 }}
+        >
+          <motion.div
+            role="status"
+            aria-label="Loading Remoof"
+            className="relative w-[320px] h-[320px] rounded-full border border-white/10 bg-gradient-to-br from-slate-900 via-slate-950 to-black shadow-[0_20px_60px_-20px_rgba(0,0,0,0.8)] overflow-hidden"
+            initial={{ scale: 0.9, opacity: 0 }}
+            animate={{ scale: 1, opacity: 1 }}
+            exit={{ scale: 0.95, opacity: 0 }}
+            transition={{ type: 'spring', stiffness: 120, damping: 18 }}
+          >
+            <div className="absolute inset-0 bg-[radial-gradient(circle_at_20%_20%,rgba(59,130,246,0.35),transparent_45%),radial-gradient(circle_at_80%_0%,rgba(16,185,129,0.4),transparent_40%),radial-gradient(circle_at_50%_80%,rgba(14,165,233,0.35),transparent_35%)]" />
+            <div className="absolute inset-8 rounded-full border border-white/5" />
+            <motion.div
+              className="absolute inset-0 flex items-center justify-center"
+              animate={{ rotate: 360 }}
+              transition={{ duration: 16, repeat: Infinity, ease: 'linear' }}
             >
-              Enter Remoof
-            </button>
-            <button
-              type="button"
-              onClick={() => setShouldShow(false)}
-              className="rounded-full border border-white/20 px-4 py-2 text-sm text-slate-200 transition hover:border-white/50"
+              <div className="h-48 w-48 rounded-full border border-white/10" />
+              <div className="absolute -top-4 right-[25%] h-4 w-4 rounded-full bg-brand shadow-[0_0_24px_rgba(56,189,248,0.8)]" />
+              <div className="absolute -bottom-4 left-[18%] h-3 w-3 rounded-full bg-white/80 shadow-[0_0_18px_rgba(255,255,255,0.65)]" />
+            </motion.div>
+            <motion.div
+              className="absolute inset-0 flex items-center justify-center"
+              animate={{ rotate: -360 }}
+              transition={{ duration: 20, repeat: Infinity, ease: 'linear' }}
             >
-              Skip intro
-            </button>
-          </div>
-        </div>
-      </div>
-    </div>
+              <div className="h-60 w-60 rounded-full border border-white/10 border-dashed" />
+              <div className="absolute left-8 -top-2 h-2 w-2 rounded-full bg-emerald-400 shadow-[0_0_18px_rgba(52,211,153,0.9)]" />
+            </motion.div>
+            <div className="absolute inset-0 flex flex-col items-center justify-center gap-3 text-center text-white">
+              <div className="h-12 w-12 rounded-full bg-white/5 border border-white/10 flex items-center justify-center">
+                <span className="text-lg font-semibold tracking-tight">RM</span>
+              </div>
+              <p className="text-sm uppercase tracking-[0.25em] text-slate-200/70">Remoof</p>
+              <p className="text-xs text-slate-300/80">Calibrating storefront systems…</p>
+              <button
+                type="button"
+                onClick={() => setShouldShow(false)}
+                className="mt-2 rounded-full bg-white/10 px-4 py-1.5 text-xs font-semibold text-white backdrop-blur transition hover:bg-white/20 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white/50"
+              >
+                Skip animation
+              </button>
+            </div>
+          </motion.div>
+        </motion.div>
+      )}
+    </AnimatePresence>
   );
 }
