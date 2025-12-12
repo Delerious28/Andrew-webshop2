@@ -3,6 +3,7 @@ import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth';
 import { prisma } from '@/lib/prisma';
 import { AdminDashboard } from '@/components/AdminDashboard';
+import { AdminUsersConsole } from '@/components/admin/AdminUsersConsole';
 import { PageShell } from '@/components/PageShell';
 
 export default async function AdminPage() {
@@ -43,6 +44,8 @@ export default async function AdminPage() {
           orders={orders}
           faqs={parsedFaqs}
         />
+
+        <AdminUsersConsole />
       </div>
     </PageShell>
   );
